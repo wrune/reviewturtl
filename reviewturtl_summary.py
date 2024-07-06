@@ -51,25 +51,28 @@ def post_pr_comment(pr_number, repo, long_summary):
 def main(pr_number, repo):
     try:
         # Input validation for PR number and repository name
-        if not pr_number.isdigit():
+        if pr_number and not pr_number.isdigit():
             raise ValueError("Invalid pull request number. It should be a numeric value.")
         if '/' not in repo or len(repo.split('/')) != 2:
             raise ValueError("Invalid repository name. It should be in the format 'owner/repo'.")
 
-        changed_files = get_changed_files(pr_number, repo)
-        all_changes = ""
-        for file in changed_files:
-            diff = get_file_diff(file)
-            all_changes += f"Changes in {file}:\n{diff}\n\n"
+        if pr_number:
+            changed_files = get_changed_files(pr_number, repo)
+            all_changes = ""
+            for file in changed_files:
+                diff = get_file_diff(file)
+                all_changes += f"Changes in {file}:\n{diff}\n\n"
 
-        short_summary = generate_summary(all_changes, max_tokens=50)
-        long_summary = generate_summary(all_changes, max_tokens=300)
+            short_summary = generate_summary(all_changes, max_tokens=50)
+            long_summary = generate_summary(all_changes, max_tokens=300)
 
-        update_pr_description(pr_number, repo, short_summary)
-        post_pr_comment(pr_number, repo, long_summary)
+            update_pr_description(pr_number, repo, short_summary)
+            post_pr_comment(pr_number, repo, long_summary)
 
-        print("Short summary appended to PR description.")
-        print("Long summary posted as a comment.")
+            print("Short summary appended to PR description.")
+            print("Long summary posted as a comment.")
+        else:
+            print("No pull request number provided. Skipping summarization.")
     except ValueError as ve:
         print(f"Input Error: {ve}")
     except openai.error.OpenAIError as oae:
@@ -83,7 +86,7 @@ def main(pr_number, repo):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Summarize pull request changes using OpenAI's GPT model.")
-    parser.add_argument("--pr-number", required=True, help="The pull request number.")
+    parser.add_argument("--pr-number", required=False, help="The pull request number.")
     parser.add_argument("--repo", required=True, help="The repository in the format 'owner/repo'.")
     args = parser.parse_args()
 
