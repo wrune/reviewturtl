@@ -32,7 +32,13 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        poetry run python reviewturtl_summary.py \
-          --repo ${{ github.repository }} \
-          --pr-number ${{ github.event.number }} \
-          --token ${{ secrets.GITHUB_TOKEN }}
+        if [ "${{ github.event.pull_request.number }}" ]; then
+          poetry run python reviewturtl_summary.py \
+            --repo ${{ github.repository }} \
+            --pr-number ${{ github.event.pull_request.number }} \
+            --token ${{ secrets.GITHUB_TOKEN }}
+        else
+          poetry run python reviewturtl_summary.py \
+            --repo ${{ github.repository }} \
+            --token ${{ secrets.GITHUB_TOKEN }}
+        fi
