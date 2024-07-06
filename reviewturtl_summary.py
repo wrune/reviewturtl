@@ -2,6 +2,7 @@ import subprocess
 import json
 import openai
 import os
+import argparse
 
 def run_shell_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -81,6 +82,9 @@ def main(pr_number, repo):
         print(f"Unexpected Error: {e}")
 
 if __name__ == "__main__":
-    pr_number = sanitize_input(input("Enter the pull request number: "))
-    repo = sanitize_input(input("Enter the repository (owner/repo): "))
-    main(pr_number, repo)
+    parser = argparse.ArgumentParser(description="Summarize pull request changes using OpenAI's GPT model.")
+    parser.add_argument("--pr-number", required=True, help="The pull request number.")
+    parser.add_argument("--repo", required=True, help="The repository in the format 'owner/repo'.")
+    args = parser.parse_args()
+
+    main(args.pr_number, args.repo)
