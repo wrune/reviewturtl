@@ -3,6 +3,9 @@ name: PR Summarizer
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - feature/github-actions-integration
 
 jobs:
   summarize:
