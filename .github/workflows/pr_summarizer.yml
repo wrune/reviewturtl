@@ -35,10 +35,8 @@ jobs:
         if [ "${{ github.event.pull_request.number }}" ]; then
           poetry run python reviewturtl_summary.py \
             --repo ${{ github.repository }} \
-            --pr-number ${{ github.event.pull_request.number }} \
-            --token ${{ secrets.GITHUB_TOKEN }}
+            --pr-number ${{ github.event.pull_request.number }}
         else
           poetry run python reviewturtl_summary.py \
-            --repo ${{ github.repository }} \
-            --token ${{ secrets.GITHUB_TOKEN }}
+            --repo ${{ github.repository }}
         fi
