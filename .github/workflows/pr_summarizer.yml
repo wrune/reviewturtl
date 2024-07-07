@@ -28,6 +28,7 @@ jobs:
     - name: Run PR summarization script
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         poetry run python reviewturtl_summary.py \
           --repo ${{ github.repository }} \
