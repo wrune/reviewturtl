@@ -3,9 +3,6 @@ name: PR Summarizer
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - feature/github-actions-integration
 
 jobs:
   summarize:
@@ -32,11 +29,6 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        if [ "${{ github.event.pull_request.number }}" ]; then
-          poetry run python reviewturtl_summary.py \
-            --repo ${{ github.repository }} \
-            --pr-number ${{ github.event.pull_request.number }}
-        else
-          poetry run python reviewturtl_summary.py \
-            --repo ${{ github.repository }}
-        fi
+        poetry run python reviewturtl_summary.py \
+          --repo ${{ github.repository }} \
+          --pr-number ${{ github.event.pull_request.number }}
