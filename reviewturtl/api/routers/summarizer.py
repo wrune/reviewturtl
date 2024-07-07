@@ -21,13 +21,16 @@ async def summarize_code_chunk(
     body: SummarizerRequest,
 ) -> SummarizerResponse:
     try:
-        old_chunk_code = body.chunks.old_chunk_code
-        new_chunk_code = body.chunks.new_chunk_code
-        summary = summarizer(old_chunk_code, new_chunk_code)
+        file_diff_content = body.file_diff
+        summary = summarizer(file_diff_content)
         reasoning = summarizer.reason()
         log.debug(f"Summarized code chunk: {summary}")
         return SummarizerResponse(
-            data=SummarizerData(summary=summary, reason=reasoning)
+            data=SummarizerData(
+                walkthrough=summary.walkthrough,
+                tabular_summary=summary.changes_in_tabular_description,
+                reason=reasoning,
+            )
         )
     except Exception as e:
         log.error(f"Error summarizing code chunk: {e}")

@@ -2,19 +2,15 @@ from pydantic import BaseModel
 from typing import Optional, Any
 
 
-class SummarizerChunk(BaseModel):
-    old_chunk_code: str
-    new_chunk_code: str
-
-
 class SummarizerRequest(BaseModel):
-    chunks: SummarizerChunk
+    file_diff: str
     context: Optional[str] = None
 
 
 class SummarizerData(BaseModel):
     reason: str
-    summary: str
+    walkthrough: str
+    tabular_summary: str
 
 
 class SummarizerResponse(BaseModel):
