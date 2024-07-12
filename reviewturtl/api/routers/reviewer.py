@@ -1,37 +1,34 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from reviewturtl.api.route_types import (
-    SummarizerRequest,
+    ReviewerRequest,
     StandardResponse,
-    SummarizerData,
+    ReviewerData,
 )
-from reviewturtl.src.agents.summarizer_agent import SummarizerAgent
+from reviewturtl.src.agents.reviewer_agent import ReviewerAgent
 from reviewturtl.logger import get_logger
 from reviewturtl.settings import get_settings
 
 log = get_logger(__name__)
 router = APIRouter()
 settings = get_settings()
-summarizer = SummarizerAgent()
+reviewer = ReviewerAgent()
 
 
-@router.post("/api/v1/summarize")
-async def summarize_code_chunk(
+@router.post("/api/v1/review")
+async def review_code_chunk(
     request: Request,
-    body: SummarizerRequest,
+    body: ReviewerRequest,
 ) -> StandardResponse:
     try:
         file_diff_content = body.file_diff
-        summary = summarizer(file_diff_content)
-        reasoning = summarizer.reason()
-        log.debug(f"Summarized code chunk: {summary}")
+        prediction_object = reviewer(file_diff_content)
+        log.debug(f"Review comments: {prediction_object.line_by_line_comments}")
         return StandardResponse(
-            data=SummarizerData(
-                walkthrough=summary.walkthrough,
-                tabular_summary=summary.changes_in_tabular_description,
-                reason=reasoning,
+            data=ReviewerData(
+                line_by_line_comments=prediction_object.line_by_line_comments,
             )
-        )
+            )
     except Exception as e:
         log.error(f"Error summarizing code chunk: {e}")
         return JSONResponse(
