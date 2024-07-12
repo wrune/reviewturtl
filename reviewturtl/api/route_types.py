@@ -1,19 +1,24 @@
 from pydantic import BaseModel
-from typing import Optional, Any
-
+from typing import Optional, Any,List,Union
+from reviewturtl.src.signatures.signatures import ReviewComments
 
 class SummarizerRequest(BaseModel):
     file_diff: str
     context: Optional[str] = None
 
+class ReviewerRequest(BaseModel):
+    file_diff: str
+    context: Optional[str] = None
 
 class SummarizerData(BaseModel):
     reason: str
     walkthrough: str
     tabular_summary: str
 
+class ReviewerData(BaseModel):
+    line_by_line_comments: List[ReviewComments]
 
-class SummarizerResponse(BaseModel):
+class StandardResponse(BaseModel):
     error: Optional[str] = None
-    data: Optional[SummarizerData] = None
+    data: Optional[Union[SummarizerData, ReviewerData]] = None
     meta: Optional[Any] = None
