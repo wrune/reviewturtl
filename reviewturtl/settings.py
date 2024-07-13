@@ -21,7 +21,17 @@ class Settings(BaseSettings):
 
     
 
-def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=None,max_tokens:Optional[int]=None):
+def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=None,max_tokens:Optional[int]=None,set_global:bool = True):
+    """
+    This function initializes dspy with the given model, api_key, and max_tokens.
+    It returns the model wrapper object in dspy.
+    Args:
+        model (str, optional): The model to use. Defaults to "gpt-4o".
+        api_key (str, optional): The API key to use. Defaults to the OPENAI_API_KEY from the settings.
+        max_tokens (int, optional): The maximum number of tokens to use. Defaults to 3000.
+    Returns:
+        dspy.OpenAI: The model wrapper object in dspy.
+    """
     if model is None:
         model = "gpt-4o"
     if api_key is None:
@@ -33,7 +43,11 @@ def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=
         api_key=api_key,
         max_tokens=max_tokens,
     )
-    dspy.settings.configure(lm=turbo)
+    # disable later , right now setting the model to the global level
+    if set_global:
+        dspy.settings.configure(lm=turbo)
+    # this returns the model wrapper object in dspy
+    return turbo
 
 def get_settings():
     return Settings()
