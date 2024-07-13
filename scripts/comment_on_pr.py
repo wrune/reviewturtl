@@ -4,6 +4,7 @@ import logging
 
 
 logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 
 def post_comment(owner, repo, issue_number, comment_body, token):
