@@ -28,6 +28,6 @@ if __name__ == "__main__":
     status_code = post_comment(owner, repo, pr_number, comment, github_token)
 
     if status_code == 201:
-        logging.info("Comment posted successfully!")
+        log.info("Comment posted successfully!")
     else:
-        logging.info("Failed to post comment. Status code:", status_code)
+        log.info("Failed to post comment. Status code:", status_code)
