@@ -1,0 +1,626 @@
+[
+    {
+        "name": "get_logger",
+        "signature": "def get_logger(name) -> None",
+        "code_type": "Function",
+        "docstring": null,
+        "line": 46,
+        "line_from": 46,
+        "line_to": 52,
+        "context": {
+            "module": "logger",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/logger.py",
+            "file_name": "logger.py",
+            "struct_name": "unknown",
+            "snippet": "def get_logger(name: str):\n    logger = structlog.get_logger(name)\n    if get_settings().is_prod():\n        logging.basicConfig(handlers=[console_handler], level=logging.INFO)\n    else:\n        logging.basicConfig(handlers=[console_handler], level=logging.DEBUG)\n    return logger"
+        }
+    },
+    {
+        "name": "Environment",
+        "signature": "class Environment",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 6,
+        "line_from": 6,
+        "line_to": 8,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "Environment",
+            "snippet": "class Environment(str, Enum):\n    Production = \"PROD\"\n    Development = \"DEV\""
+        }
+    },
+    {
+        "name": "Settings",
+        "signature": "class Settings",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 10,
+        "line_from": 10,
+        "line_to": 20,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "Settings",
+            "snippet": "class Settings(BaseSettings):\n    model_config = SettingsConfigDict(env_file=\".env\")\n    ENVIRONMENT: Environment = Environment.Development\n    OPENAI_API_KEY: str = \"\"\n    APP_NAME: str = \"reviewturtl\"\n\n    def is_dev(self):\n        return self.ENVIRONMENT == Environment.Development\n\n    def is_prod(self):\n        return self.ENVIRONMENT == Environment.Production"
+        }
+    },
+    {
+        "name": "is_dev",
+        "signature": "def is_dev(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 16,
+        "line_from": 16,
+        "line_to": 17,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "Settings",
+            "snippet": "    def is_dev(self):\n        return self.ENVIRONMENT == Environment.Development"
+        }
+    },
+    {
+        "name": "is_prod",
+        "signature": "def is_prod(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 19,
+        "line_from": 19,
+        "line_to": 20,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "Settings",
+            "snippet": "    def is_prod(self):\n        return self.ENVIRONMENT == Environment.Production"
+        }
+    },
+    {
+        "name": "initialize_dspy_with_configs",
+        "signature": "def initialize_dspy_with_configs(model, api_key, max_tokens, set_global) -> None",
+        "code_type": "Function",
+        "docstring": "This function initializes dspy with the given model, api_key, and max_tokens.\nIt returns the model wrapper object in dspy.\nArgs:\n    model (str, optional): The model to use. Defaults to \"gpt-4o\".\n    api_key (str, optional): The API key to use. Defaults to the OPENAI_API_KEY from the settings.\n    max_tokens (int, optional): The maximum number of tokens to use. Defaults to 3000.\nReturns:\n    dspy.OpenAI: The model wrapper object in dspy.",
+        "line": 24,
+        "line_from": 24,
+        "line_to": 50,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "unknown",
+            "snippet": "def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=None,max_tokens:Optional[int]=None,set_global:bool = True):\n    \"\"\"\n    This function initializes dspy with the given model, api_key, and max_tokens.\n    It returns the model wrapper object in dspy.\n    Args:\n        model (str, optional): The model to use. Defaults to \"gpt-4o\".\n        api_key (str, optional): The API key to use. Defaults to the OPENAI_API_KEY from the settings.\n        max_tokens (int, optional): The maximum number of tokens to use. Defaults to 3000.\n    Returns:\n        dspy.OpenAI: The model wrapper object in dspy.\n    \"\"\"\n    if model is None:\n        model = \"gpt-4o\"\n    if api_key is None:\n        api_key = Settings().OPENAI_API_KEY\n    if max_tokens is None:\n        max_tokens = 3000\n    turbo = dspy.OpenAI(\n        model=model,\n        api_key=api_key,\n        max_tokens=max_tokens,\n    )\n    # disable later , right now setting the model to the global level\n    if set_global:\n        dspy.settings.configure(lm=turbo)\n    # this returns the model wrapper object in dspy\n    return turbo"
+        }
+    },
+    {
+        "name": "get_settings",
+        "signature": "def get_settings() -> None",
+        "code_type": "Function",
+        "docstring": null,
+        "line": 52,
+        "line_from": 52,
+        "line_to": 53,
+        "context": {
+            "module": "settings",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/settings.py",
+            "file_name": "settings.py",
+            "struct_name": "unknown",
+            "snippet": "def get_settings():\n    return Settings()"
+        }
+    },
+    {
+        "name": "ClientCapabilities",
+        "signature": "class ClientCapabilities",
+        "code_type": "Class",
+        "docstring": "Defines the capabilities provided by the client (editor or tool).",
+        "line": 11,
+        "line_from": 11,
+        "line_to": 17,
+        "context": {
+            "module": "lsp.lsp_server",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/lsp/lsp_server.py",
+            "file_name": "lsp_server.py",
+            "struct_name": "ClientCapabilities",
+            "snippet": "class ClientCapabilities(BaseModel):\n    \"\"\"\n    Defines the capabilities provided by the client (editor or tool).\n    \"\"\"\n    textDocument: Optional[dict] = None\n    workspace: Optional[dict] = None\n    experimental: Optional[dict] = None"
+        }
+    },
+    {
+        "name": "InitializeParams",
+        "signature": "class InitializeParams",
+        "code_type": "Class",
+        "docstring": "Parameters for the initialize request.",
+        "line": 19,
+        "line_from": 19,
+        "line_to": 28,
+        "context": {
+            "module": "lsp.lsp_server",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/lsp/lsp_server.py",
+            "file_name": "lsp_server.py",
+            "struct_name": "InitializeParams",
+            "snippet": "class InitializeParams(BaseModel):\n    \"\"\"\n    Parameters for the initialize request.\n    \"\"\"\n    processId: Optional[int]\n    rootPath: Optional[str] = None\n    rootUri: Optional[str] = None\n    capabilities: ClientCapabilities\n    trace: Optional[str] = None\n    workspaceFolders: Optional[List[dict]] = None"
+        }
+    },
+    {
+        "name": "health",
+        "signature": "async def health() -> None",
+        "code_type": "Function",
+        "docstring": null,
+        "line": 12,
+        "line_from": 12,
+        "line_to": 17,
+        "context": {
+            "module": "api.api",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/api.py",
+            "file_name": "api.py",
+            "struct_name": "unknown",
+            "snippet": "async def health():\n    return {\n        \"status\": \"OK\",\n        \"app_name\": cfg.APP_NAME,\n        \"environment\": cfg.ENVIRONMENT,\n    }"
+        }
+    },
+    {
+        "name": "SummarizerRequest",
+        "signature": "class SummarizerRequest",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 5,
+        "line_from": 5,
+        "line_to": 7,
+        "context": {
+            "module": "api.route_types",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/route_types.py",
+            "file_name": "route_types.py",
+            "struct_name": "SummarizerRequest",
+            "snippet": "class SummarizerRequest(BaseModel):\n    file_diff: str\n    context: Optional[str] = None"
+        }
+    },
+    {
+        "name": "ReviewerRequest",
+        "signature": "class ReviewerRequest",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 9,
+        "line_from": 9,
+        "line_to": 11,
+        "context": {
+            "module": "api.route_types",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/route_types.py",
+            "file_name": "route_types.py",
+            "struct_name": "ReviewerRequest",
+            "snippet": "class ReviewerRequest(BaseModel):\n    file_diff: str\n    context: Optional[str] = None"
+        }
+    },
+    {
+        "name": "SummarizerData",
+        "signature": "class SummarizerData",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 13,
+        "line_from": 13,
+        "line_to": 16,
+        "context": {
+            "module": "api.route_types",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/route_types.py",
+            "file_name": "route_types.py",
+            "struct_name": "SummarizerData",
+            "snippet": "class SummarizerData(BaseModel):\n    reason: str\n    walkthrough: str\n    tabular_summary: str"
+        }
+    },
+    {
+        "name": "ReviewerData",
+        "signature": "class ReviewerData",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 18,
+        "line_from": 18,
+        "line_to": 19,
+        "context": {
+            "module": "api.route_types",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/route_types.py",
+            "file_name": "route_types.py",
+            "struct_name": "ReviewerData",
+            "snippet": "class ReviewerData(BaseModel):\n    line_by_line_comments: List[ReviewComments]"
+        }
+    },
+    {
+        "name": "StandardResponse",
+        "signature": "class StandardResponse",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 21,
+        "line_from": 21,
+        "line_to": 24,
+        "context": {
+            "module": "api.route_types",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/route_types.py",
+            "file_name": "route_types.py",
+            "struct_name": "StandardResponse",
+            "snippet": "class StandardResponse(BaseModel):\n    error: Optional[str] = None\n    data: Optional[Union[SummarizerData, ReviewerData]] = None\n    meta: Optional[Any] = None"
+        }
+    },
+    {
+        "name": "review_code_chunk",
+        "signature": "async def review_code_chunk(request, body) -> Name(id='StandardResponse', ctx=Load())",
+        "code_type": "Function",
+        "docstring": null,
+        "line": 19,
+        "line_from": 19,
+        "line_to": 37,
+        "context": {
+            "module": "api.routers.reviewer",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/routers/reviewer.py",
+            "file_name": "reviewer.py",
+            "struct_name": "unknown",
+            "snippet": "async def review_code_chunk(\n    request: Request,\n    body: ReviewerRequest,\n) -> StandardResponse:\n    try:\n        file_diff_content = body.file_diff\n        prediction_object = reviewer(file_diff_content)\n        log.debug(f\"Review comments: {prediction_object.line_by_line_comments}\")\n        return StandardResponse(\n            data=ReviewerData(\n                line_by_line_comments=prediction_object.line_by_line_comments,\n            )\n            )\n    except Exception as e:\n        log.error(f\"Error summarizing code chunk: {e}\")\n        return JSONResponse(\n            status_code=400,\n            content=StandardResponse(error=str(e)).model_dump(),\n        )"
+        }
+    },
+    {
+        "name": "summarize_code_chunk",
+        "signature": "async def summarize_code_chunk(request, body) -> Name(id='StandardResponse', ctx=Load())",
+        "code_type": "Function",
+        "docstring": null,
+        "line": 19,
+        "line_from": 19,
+        "line_to": 40,
+        "context": {
+            "module": "api.routers.summarizer",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/routers/summarizer.py",
+            "file_name": "summarizer.py",
+            "struct_name": "unknown",
+            "snippet": "async def summarize_code_chunk(\n    request: Request,\n    body: SummarizerRequest,\n) -> StandardResponse:\n    try:\n        file_diff_content = body.file_diff\n        summary = summarizer(file_diff_content)\n        reasoning = summarizer.reason()\n        log.debug(f\"Summarized code chunk: {summary}\")\n        return StandardResponse(\n            data=SummarizerData(\n                walkthrough=summary.walkthrough,\n                tabular_summary=summary.changes_in_tabular_description,\n                reason=reasoning,\n            )\n        )\n    except Exception as e:\n        log.error(f\"Error summarizing code chunk: {e}\")\n        return JSONResponse(\n            status_code=400,\n            content=StandardResponse(error=str(e)).model_dump(),\n        )"
+        }
+    },
+    {
+        "name": "ReviewComments",
+        "signature": "class ReviewComments",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 4,
+        "line_from": 4,
+        "line_to": 7,
+        "context": {
+            "module": "src.signatures.typed_pydantic_classes",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/signatures/typed_pydantic_classes.py",
+            "file_name": "typed_pydantic_classes.py",
+            "struct_name": "ReviewComments",
+            "snippet": "class ReviewComments(BaseModel):\n    line_range: str\n    suggested_code_change: Optional[str] = None\n    comment: Optional[str] = None"
+        }
+    },
+    {
+        "name": "SummarizerSignature",
+        "signature": "class SummarizerSignature",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 6,
+        "line_from": 6,
+        "line_to": 33,
+        "context": {
+            "module": "src.signatures.signatures",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/signatures/signatures.py",
+            "file_name": "signatures.py",
+            "struct_name": "SummarizerSignature",
+            "snippet": "class SummarizerSignature(dspy.Signature):\n    __doc__ = f\"\"\"\n        {FILE_DIFF_CONTENT_EXPLANATION}\n        >> **Specific Instructions**\\n\n            - The summary should be in English.\\n\n            - Provide a short and factoid summary with a short description of the cummalative changes in **walkthrough**.\\n\n            - Then give the summary of changed content per file in a tabular format in markdown table for **changes_in_tabular_description**.\\\n            - Do not mention which lines have been changed.\\n\n            - The change summary in the table should be short and concise.\\n\n        ### Example:\\n\n        walkthrough:\\n\n        The method and logic to calculate the area of the triangle has been changed.\\n\n        changes_in_tabular_description:\\n\n        | File Name | Changes |\n        | --------- | -------- |\n        | test.txt  | The method to calculate the area of the triangle has been changed. |\n        | test2.txt | The logic to calculate the area of the triangle has been changed. |\n    \n    \"\"\"\n    file_diff: str = dspy.InputField(\n        desc=\"The diff of the file\",\n    )\n    walkthrough: str = dspy.OutputField(\n        desc=\"The summary of changes made in the PR\",\n    )\n    changes_in_tabular_description: str = dspy.OutputField(\n        desc=\"The Markdown table containing the changes in the file\",\n    )"
+        }
+    },
+    {
+        "name": "ReviewerSignature",
+        "signature": "class ReviewerSignature",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 35,
+        "line_from": 35,
+        "line_to": 58,
+        "context": {
+            "module": "src.signatures.signatures",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/signatures/signatures.py",
+            "file_name": "signatures.py",
+            "struct_name": "ReviewerSignature",
+            "snippet": "class ReviewerSignature(dspy.Signature):\n    __doc__ = f\"\"\"\n        {FILE_DIFF_CONTENT_EXPLANATION}\n    >> **Specific Instructions**\\n\n            - The review should be in English.\\n\n            - Provide detailed comments for each line change in **line_by_line_comments**.\\n\n            - Each comment should suggest improvements or corrections to the code changes. Do not include the comments and the lines for which NO CHANGES are required.\\n\n            - The comments should be concise and to the point.\\n\n        ### Example:\\n\n        line_by_line_comments:\\n\n        [\n            \\b{{\n                \"line_range\": \"40:50\",\n                \"suggested_code_change\": \"new_code_content\",\n                \"comment\": \"Consider using a more efficient algorithm for this operation.\"\n            }}\\b\n        ]\n    \"\"\"\n    file_diff: str = dspy.InputField(\n        desc=\"The diff of the file\",\n    )\n    line_by_line_comments: List[ReviewComments] = dspy.OutputField(\n        desc=\"The line by line review for the file\",\n    )"
+        }
+    },
+    {
+        "name": "SummarizerAgent",
+        "signature": "class SummarizerAgent",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 6,
+        "line_from": 6,
+        "line_to": 21,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "class SummarizerAgent(Agent):\n    def __init__(self):\n        super().__init__(DspyProgramme(signature=SummarizerSignature))\n\n    def forward(self, file_diff,model=None):\n        self.prediction_object = self.programme.forward(file_diff=file_diff,model=model)\n        return self.prediction_object\n\n    def walkthrough(self):\n        return self.prediction_object.walkthrough\n\n    def changes_in_tabular_description(self):\n        return self.prediction_object.changes_in_tabular_description\n\n    def __call__(self, file_diff,model=None):\n        return self.forward(file_diff,model=model)"
+        }
+    },
+    {
+        "name": "__init__",
+        "signature": "def __init__(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 7,
+        "line_from": 7,
+        "line_to": 8,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "    def __init__(self):\n        super().__init__(DspyProgramme(signature=SummarizerSignature))"
+        }
+    },
+    {
+        "name": "forward",
+        "signature": "def forward(self, file_diff, model) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 10,
+        "line_from": 10,
+        "line_to": 12,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "    def forward(self, file_diff,model=None):\n        self.prediction_object = self.programme.forward(file_diff=file_diff,model=model)\n        return self.prediction_object"
+        }
+    },
+    {
+        "name": "walkthrough",
+        "signature": "def walkthrough(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 14,
+        "line_from": 14,
+        "line_to": 15,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "    def walkthrough(self):\n        return self.prediction_object.walkthrough"
+        }
+    },
+    {
+        "name": "changes_in_tabular_description",
+        "signature": "def changes_in_tabular_description(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 17,
+        "line_from": 17,
+        "line_to": 18,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "    def changes_in_tabular_description(self):\n        return self.prediction_object.changes_in_tabular_description"
+        }
+    },
+    {
+        "name": "__call__",
+        "signature": "def __call__(self, file_diff, model) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 20,
+        "line_from": 20,
+        "line_to": 21,
+        "context": {
+            "module": "src.agents.summarizer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/summarizer_agent.py",
+            "file_name": "summarizer_agent.py",
+            "struct_name": "SummarizerAgent",
+            "snippet": "    def __call__(self, file_diff,model=None):\n        return self.forward(file_diff,model=model)"
+        }
+    },
+    {
+        "name": "Agent",
+        "signature": "class Agent",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 1,
+        "line_from": 1,
+        "line_to": 20,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "class Agent:\n    def __init__(self, programme):\n        self.programme = programme\n        self.prediction_object = None\n\n    def load_model(self, model_path):\n        # Load the model from the specified path\n        self.programme.load(model_path)\n\n    def save_model(self, model_path):\n        # Save the current model to the specified path\n        self.programme.save(model_path)\n\n    def reason(self):\n        # Return the reason for the prediction\n        return self.prediction_object.reasoning\n\n    def reset(self):\n        # Reset the internal state\n        self.prediction_object = None"
+        }
+    },
+    {
+        "name": "__init__",
+        "signature": "def __init__(self, programme) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 2,
+        "line_from": 2,
+        "line_to": 4,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "    def __init__(self, programme):\n        self.programme = programme\n        self.prediction_object = None"
+        }
+    },
+    {
+        "name": "load_model",
+        "signature": "def load_model(self, model_path) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 6,
+        "line_from": 6,
+        "line_to": 8,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "    def load_model(self, model_path):\n        # Load the model from the specified path\n        self.programme.load(model_path)"
+        }
+    },
+    {
+        "name": "save_model",
+        "signature": "def save_model(self, model_path) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 10,
+        "line_from": 10,
+        "line_to": 12,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "    def save_model(self, model_path):\n        # Save the current model to the specified path\n        self.programme.save(model_path)"
+        }
+    },
+    {
+        "name": "reason",
+        "signature": "def reason(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 14,
+        "line_from": 14,
+        "line_to": 16,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "    def reason(self):\n        # Return the reason for the prediction\n        return self.prediction_object.reasoning"
+        }
+    },
+    {
+        "name": "reset",
+        "signature": "def reset(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 18,
+        "line_from": 18,
+        "line_to": 20,
+        "context": {
+            "module": "src.agents.base_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/base_agent.py",
+            "file_name": "base_agent.py",
+            "struct_name": "Agent",
+            "snippet": "    def reset(self):\n        # Reset the internal state\n        self.prediction_object = None"
+        }
+    },
+    {
+        "name": "ReviewerAgent",
+        "signature": "class ReviewerAgent",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 6,
+        "line_from": 6,
+        "line_to": 15,
+        "context": {
+            "module": "src.agents.reviewer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/reviewer_agent.py",
+            "file_name": "reviewer_agent.py",
+            "struct_name": "ReviewerAgent",
+            "snippet": "class ReviewerAgent(Agent):\n    def __init__(self):\n        super().__init__(DspyProgramme(signature=ReviewerSignature))\n\n    def forward(self, file_diff,model=None):\n        self.prediction_object = self.programme.forward(file_diff=file_diff,model=model)\n        return self.prediction_object\n    \n    def __call__(self, file_diff,model=None):\n        return self.forward(file_diff,model=model)"
+        }
+    },
+    {
+        "name": "__init__",
+        "signature": "def __init__(self) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 7,
+        "line_from": 7,
+        "line_to": 8,
+        "context": {
+            "module": "src.agents.reviewer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/reviewer_agent.py",
+            "file_name": "reviewer_agent.py",
+            "struct_name": "ReviewerAgent",
+            "snippet": "    def __init__(self):\n        super().__init__(DspyProgramme(signature=ReviewerSignature))"
+        }
+    },
+    {
+        "name": "forward",
+        "signature": "def forward(self, file_diff, model) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 10,
+        "line_from": 10,
+        "line_to": 12,
+        "context": {
+            "module": "src.agents.reviewer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/reviewer_agent.py",
+            "file_name": "reviewer_agent.py",
+            "struct_name": "ReviewerAgent",
+            "snippet": "    def forward(self, file_diff,model=None):\n        self.prediction_object = self.programme.forward(file_diff=file_diff,model=model)\n        return self.prediction_object"
+        }
+    },
+    {
+        "name": "__call__",
+        "signature": "def __call__(self, file_diff, model) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 14,
+        "line_from": 14,
+        "line_to": 15,
+        "context": {
+            "module": "src.agents.reviewer_agent",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/agents/reviewer_agent.py",
+            "file_name": "reviewer_agent.py",
+            "struct_name": "ReviewerAgent",
+            "snippet": "    def __call__(self, file_diff,model=None):\n        return self.forward(file_diff,model=model)"
+        }
+    },
+    {
+        "name": "TypedChainOfThoughtProgramme",
+        "signature": "class TypedChainOfThoughtProgramme",
+        "code_type": "Class",
+        "docstring": null,
+        "line": 2,
+        "line_from": 2,
+        "line_to": 11,
+        "context": {
+            "module": "src.programmes.programmes",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/programmes/programmes.py",
+            "file_name": "programmes.py",
+            "struct_name": "TypedChainOfThoughtProgramme",
+            "snippet": "class TypedChainOfThoughtProgramme(dspy.Module):\n    def __init__(self, signature):\n        super().__init__()\n        self.predictor = dspy.TypedChainOfThought(signature)\n\n    def forward(self, model=None,**kwargs):\n        if model:\n            with dspy.context(lm=model):\n                return self.predictor(**kwargs)\n        return self.predictor(**kwargs)"
+        }
+    },
+    {
+        "name": "__init__",
+        "signature": "def __init__(self, signature) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 3,
+        "line_from": 3,
+        "line_to": 5,
+        "context": {
+            "module": "src.programmes.programmes",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/programmes/programmes.py",
+            "file_name": "programmes.py",
+            "struct_name": "TypedChainOfThoughtProgramme",
+            "snippet": "    def __init__(self, signature):\n        super().__init__()\n        self.predictor = dspy.TypedChainOfThought(signature)"
+        }
+    },
+    {
+        "name": "forward",
+        "signature": "def forward(self, model) -> None",
+        "code_type": "Method",
+        "docstring": null,
+        "line": 7,
+        "line_from": 7,
+        "line_to": 11,
+        "context": {
+            "module": "src.programmes.programmes",
+            "file_path": "/Users/abcom/Desktop/github/reviewturtl/reviewturtl/src/programmes/programmes.py",
+            "file_name": "programmes.py",
+            "struct_name": "TypedChainOfThoughtProgramme",
+            "snippet": "    def forward(self, model=None,**kwargs):\n        if model:\n            with dspy.context(lm=model):\n                return self.predictor(**kwargs)\n        return self.predictor(**kwargs)"
+        }
+    }
+]

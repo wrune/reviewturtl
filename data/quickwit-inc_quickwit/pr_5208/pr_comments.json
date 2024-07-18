@@ -1,0 +1,106 @@
+[
+  {
+    "id": "IC_kwDOFVIwIc6EUyrz",
+    "author": {
+      "login": "etolbakov"
+    },
+    "authorAssociation": "COLLABORATOR",
+    "body": "Thanks for the reply @fulmicoton \r\nAt the moment my understanding is lacking 2 things\r\n1) General logic:  if `format` is specified - we use it to convert `gt`/ `gte`, `lt`/`lte` to date  and then the result convert to a `JsonLiteral::String`. Please let me know if I'm wrong.\r\n\r\n2) `DateTimeInputFormat` conversion: there's a [from_str](https://github.com/quickwit-oss/quickwit/blob/4de8d7afb4bebf21ba95a93101856db388128b0b/quickwit/quickwit-datetime/src/date_time_format.rs#L188) method that I was planing to use, but passing `\"format\": \"yyyy-MM-dd\"` won't succeed. Am I doing wrong assumptions on input format?\r\n ",
+    "createdAt": "2024-07-10T09:45:39Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2220042995",
+    "viewerDidAuthor": false
+  },
+  {
+    "id": "IC_kwDOFVIwIc6EVEQ7",
+    "author": {
+      "login": "fulmicoton"
+    },
+    "authorAssociation": "CONTRIBUTOR",
+    "body": "> DateTimeInputFormat conversion: there's a [from_str](https://github.com/quickwit-oss/quickwit/blob/4de8d7afb4bebf21ba95a93101856db388128b0b/quickwit/quickwit-datetime/src/date_time_format.rs#L188) method that I was planing to use, but passing \"format\": \"yyyy-MM-dd\" won't succeed. Am I doing wrong assumptions on input format?\r\n\r\nI suspect you are suffering from a check that verifies that the date format includes parsing times.\r\nAs a workaround, you can use StrptimeParser directly instead of DateTimeInputFormat\r\n(`StrptimeParser::from_str(date_time_format_str)`).\r\n",
+    "createdAt": "2024-07-10T10:21:15Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2220115003",
+    "viewerDidAuthor": false
+  },
+  {
+    "id": "IC_kwDOFVIwIc6EVEhK",
+    "author": {
+      "login": "fulmicoton"
+    },
+    "authorAssociation": "CONTRIBUTOR",
+    "body": "1.  General logic: I think your approach is ok.\r\n\r\n",
+    "createdAt": "2024-07-10T10:21:40Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [
+      {
+        "content": "THUMBS_UP",
+        "users": {
+          "totalCount": 1
+        }
+      }
+    ],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2220116042",
+    "viewerDidAuthor": false
+  },
+  {
+    "id": "IC_kwDOFVIwIc6EaTW_",
+    "author": {
+      "login": "etolbakov"
+    },
+    "authorAssociation": "COLLABORATOR",
+    "body": "@fulmicoton thank you for the response!\r\nCould you please take a look a the changes when you have time?\r\nIf that LGTY , I will add a test (not sure where though) and convert it to the PR.\r\n\r\n<details>\r\n  <summary>Examples Successful and Failed Responses ⬇️ </summary>\r\n  \r\n  ```sh\r\ncurl -X GET \"http://localhost:7280/api/v1/_elastic/stackoverflow-schemaless/_search?pretty\" -H 'Content-Type: application/json' -d'\r\n{\r\n  \"query\": {\r\n    \"range\": {\r\n      \"age\": {\r\n        \"gte\": \"2023-01-01\",\r\n        \"lte\": \"2023-12-31\",\r\n        \"boost\": 2.0,\r\n        \"format\": \"yyyy-MM-dd\"\r\n      }\r\n    }\r\n  }\r\n}\r\n'\r\n{\r\n  \"status\": 400,\r\n  \"error\": {\r\n    \"caused_by\": null,\r\n    \"reason\": \"Failed to parse date time: a character literal was not valid\",\r\n    \"stack_trace\": null,\r\n    \"type\": null\r\n  }\r\n}\r\n\r\n\r\ncurl -X GET \"http://localhost:7280/api/v1/_elastic/stackoverflow-schemaless/_search?pretty\"\r\n-H 'Content-Type: application/json' -d'\r\n∙ {\r\n∙   \"query\": {\r\n∙     \"range\": {\r\n∙       \"age\": {\r\n∙         \"gte\": \"2023-01-01\",\r\n∙         \"lte\": \"2023-12-31\",\r\n∙         \"boost\": 2.0,\r\n∙         \"format\": \"%Y-%m-%d\"\r\n∙       }\r\n∙     }\r\n∙   }\r\n∙ }\r\n∙ '\r\n{\r\n  \"took\": 5,\r\n  \"timed_out\": false,\r\n  \"_shards\": {\r\n    \"total\": 1,\r\n    \"successful\": 1,\r\n    \"skipped\": 0,\r\n    \"failed\": 0\r\n  },\r\n  \"hits\": {\r\n    \"total\": {\r\n      \"value\": 0,\r\n      \"relation\": \"eq\"\r\n    },\r\n    \"hits\": []\r\n  }\r\n}\r\n  ```\r\n</details>",
+    "createdAt": "2024-07-10T21:14:04Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2221487551",
+    "viewerDidAuthor": false
+  },
+  {
+    "id": "IC_kwDOFVIwIc6Ezp9a",
+    "author": {
+      "login": "etolbakov"
+    },
+    "authorAssociation": "COLLABORATOR",
+    "body": "@fulmicoton \r\nCould you please have a look when you have time?",
+    "createdAt": "2024-07-15T10:03:59Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2228133722",
+    "viewerDidAuthor": false
+  },
+  {
+    "id": "IC_kwDOFVIwIc6E6S-3",
+    "author": {
+      "login": "fulmicoton"
+    },
+    "authorAssociation": "CONTRIBUTOR",
+    "body": "thank you! I will complete our rest api test suite in another PR and send it to you for next time!",
+    "createdAt": "2024-07-16T02:19:27Z",
+    "includesCreatedEdit": false,
+    "isMinimized": false,
+    "minimizedReason": "",
+    "reactionGroups": [
+      {
+        "content": "THUMBS_UP",
+        "users": {
+          "totalCount": 1
+        }
+      }
+    ],
+    "url": "https://github.com/quickwit-oss/quickwit/pull/5208#issuecomment-2229874615",
+    "viewerDidAuthor": false
+  }
+]
