@@ -7,6 +7,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 def post_comment(owner, repo, issue_number, comment_body, token):
+    """
+    Posts a comment to a pull request on GitHub.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments"
     headers = {
         "Authorization": f"token {token}",
