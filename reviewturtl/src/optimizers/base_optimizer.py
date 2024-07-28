@@ -1,5 +1,6 @@
 import pandas as pd
 import dspy
+from reviewturtl.settings import get_4o_token_model
 
 
 class TurtlBaseOptimizer:
@@ -7,10 +8,15 @@ class TurtlBaseOptimizer:
         self.optimizer_name = optimizer_name
 
     def load_prompt_model(self, model):
+        if model is None:
+            model = get_4o_token_model()
         self.prompt_model = model
+
         return self.prompt_model
 
     def load_task_model(self, model):
+        if model is None:
+            model = get_4o_token_model()
         self.task_model = model
         return self.task_model
 
