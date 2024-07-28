@@ -3,9 +3,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 import dspy
 from typing import Optional
 
+
 class Environment(str, Enum):
     Production = "PROD"
     Development = "DEV"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
@@ -19,9 +21,19 @@ class Settings(BaseSettings):
     def is_prod(self):
         return self.ENVIRONMENT == Environment.Production
 
-    
 
-def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=None,max_tokens:Optional[int]=None,set_global:bool = True):
+def get_4o_token_model():
+    return dspy.OpenAI(
+        model="gpt-4o", api_key=Settings().OPENAI_API_KEY, max_tokens=3500
+    )
+
+
+def initialize_dspy_with_configs(
+    model: Optional[str] = None,
+    api_key: Optional[str] = None,
+    max_tokens: Optional[int] = None,
+    set_global: bool = True,
+):
     """
     This function initializes dspy with the given model, api_key, and max_tokens.
     It returns the model wrapper object in dspy.
@@ -48,6 +60,7 @@ def initialize_dspy_with_configs(model:Optional[str]=None,api_key:Optional[str]=
         dspy.settings.configure(lm=turbo)
     # this returns the model wrapper object in dspy
     return turbo
+
 
 def get_settings():
     return Settings()

@@ -3,6 +3,7 @@ from reviewturtl.src.signatures.docstrings import FILE_DIFF_CONTENT_EXPLANATION
 from reviewturtl.src.signatures.typed_pydantic_classes import ReviewComments
 from typing import List
 
+
 class SummarizerSignature(dspy.Signature):
     __doc__ = f"""
         {FILE_DIFF_CONTENT_EXPLANATION}
@@ -32,6 +33,7 @@ class SummarizerSignature(dspy.Signature):
         desc="The Markdown table containing the changes in the file",
     )
 
+
 class ReviewerSignature(dspy.Signature):
     __doc__ = f"""
         {FILE_DIFF_CONTENT_EXPLANATION}
@@ -55,4 +57,62 @@ class ReviewerSignature(dspy.Signature):
     )
     line_by_line_comments: List[ReviewComments] = dspy.OutputField(
         desc="The line by line review for the file",
+    )
+
+
+# Metrics Signatures
+
+
+class SummarizerEvaluatorWithoutGT(dspy.Signature):
+    """Evaluate the quality of a system's answer to a question according to a given criterion."""
+
+    # criterion is the alignment criterion
+    criterion: str = dspy.InputField(desc="The evaluation criterion")
+    # file_diff is the file diff given to the system
+    file_diff: str = dspy.InputField(desc="The File Diff given to the system")
+    # walkthrough is the walkthrough given to the system
+    walkthrough: str = dspy.InputField(desc="The walkthrough given to the system")
+    # changes_in_tabular_description is the changes in tabular description given to the system
+    changes_in_tabular_description: str = dspy.InputField(
+        desc="The changes in tabular description given to the system"
+    )
+    # rating_walkthrough is the rating for the walkthrough
+    rating_walkthrough: float = dspy.OutputField(
+        desc="A float rating between 1 and 5. 5 indicates the walkthrough is perfect and summarized accurately the important parts of the file_diff"
+    )
+    # rating_changes_in_tabular_description is the rating for the changes in tabular description
+    rating_changes_in_tabular_description: float = dspy.OutputField(
+        desc="A float rating between 1 and 5. 5 indicates the changes in tabular description is perfect with all the important parts of the file_diff"
+    )
+
+
+class SummarizerEvaluatorWithGT(dspy.Signature):
+    """Evaluate the quality of a system's answer to a question according to a given criterion."""
+
+    # criterion is the alignment criterion
+    criterion: str = dspy.InputField(desc="The evaluation criterion")
+    # file_diff is the file diff given to the system
+    file_diff: str = dspy.InputField(desc="The File Diff given to the system")
+    # walkthrough is the walkthrough given to the system
+    walkthrough_ground_truth: str = dspy.InputField(
+        desc="The walkthrough given to the system"
+    )
+    # walkthrough is the walkthrough given to the system
+    walkthrough_predicted: str = dspy.InputField(
+        desc="The walkthrough given to the system"
+    )
+    # changes_in_tabular_description is the changes in tabular description given to the system
+    changes_in_tabular_description_ground_truth: str = dspy.InputField(
+        desc="The changes in tabular description given to the system"
+    )
+    changes_in_tabular_description_predicted: str = dspy.InputField(
+        desc="The changes in tabular description given to the system"
+    )
+    # rating_walkthrough is the rating for the walkthrough
+    rating_walkthrough: float = dspy.OutputField(
+        desc="A float rating between 1 and 5. 5 indicates the walkthrough is perfect and summarized accurately and is closer to the walkthrough_ground_truth"
+    )
+    # rating_changes_in_tabular_description is the rating for the changes in tabular description
+    rating_changes_in_tabular_description: float = dspy.OutputField(
+        desc="A float rating between 1 and 5. 5 indicates the changes in tabular description is perfect with all the important parts of the file_diff and is closer to the changes_in_tabular_description_ground_truth"
     )

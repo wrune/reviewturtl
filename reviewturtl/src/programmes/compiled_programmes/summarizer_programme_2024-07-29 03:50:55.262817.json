@@ -1,0 +1,18 @@
+{
+  "predictor.predictor": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "file_diff": "--- a\/circle.py\n+++ b\/circle.py\n@@ -1,3 +1,4 @@\n import math\n+PI = 3.14159\n def calculate_area(radius):\n-    return math.pi * radius ** 2\n+    return PI * radius ** 2\n",
+        "reasoning": "produce the walkthrough, changes_in_tabular_description}. We first need to understand the changes made to the file `circle.py`. The diff shows that a new constant `PI` has been introduced, and the calculation of the area of the circle has been modified to use this new constant instead of `math.pi`.",
+        "walkthrough": "The calculation of the area of the circle has been updated to use a newly defined constant `PI` instead of `math.pi`.",
+        "changes_in_tabular_description": "| File Name | Changes |\n| --------- | -------- |\n| circle.py | Introduced a new constant `PI` and updated the area calculation to use this constant instead of `math.pi`. |"
+      }
+    ],
+    "signature_instructions": "Proposed Instruction: \n\n**Task Overview:**\nYou are provided with a `file_diff` representing changes made to Python files related to geometric computations. Your task is to analyze these changes and generate a structured summary that includes a `walkthrough` and a `changes_in_tabular_description`.\n\n**Instructions:**\n\n1. **Analyze the File Diff:**\n   - Identify the file(s) that have been modified, added, or deleted.\n   - Note the specific changes made within each file, focusing on modifications to mathematical computations and constants.\n\n2. **Generate the Walkthrough:**\n   - Provide a concise explanation of the overall changes made to the file(s).\n   - Highlight the purpose and impact of these changes, especially in terms of how they affect the computation of geometric properties.\n\n3. **Create the Changes in Tabular Description:**\n   - Summarize the changes for each file in a markdown table format.\n   - The table should have two columns: `File Name` and `Changes`.\n   - Ensure that the description in the `Changes` column is brief and to the point, focusing on the key modifications.\n\n**Formatting Guidelines:**\n- The walkthrough should be a short paragraph summarizing the changes.\n- The tabular description should be formatted in markdown and should not mention specific line numbers.\n- Use clear and concise language suitable for developers or learners who need to understand the code changes quickly.\n\n**Example Output:**\n\n```\nwalkthrough: The calculation of the area of the circle has been updated to use a newly defined constant `PI` instead of `math.pi`.\n\nchanges_in_tabular_description: \n| File Name | Changes |\n| --------- | -------- |\n| circle.py | Introduced a new constant `PI` and updated the area calculation to use this constant instead of `math.pi`. |\n```",
+    "signature_prefix": "```\nwalkthrough: \n```"
+  }
+}
