@@ -27,21 +27,20 @@ class TurtlSearch(TurtlPreprocessor):
 
     def search(self, query: str, collection_name: str):
         text_embedding, code_embedding = self.preprocess_for_search(query)
-        results = self.qdrant_client.search_batch(
+        results = self.qdrant_client.query_points(
             collection_name,
-            requests=[
-                models.SearchRequest(
-                    vector=models.NamedVector(
-                        name="text", vector=list(text_embedding.flatten())
-                    ),
-                    with_payload=True,
+            prefetch=[
+                models.Prefetch(
+                    query=list(text_embedding.flatten()),
+                    using="text",
                     limit=self.search_settings["limit"],
                 ),
-                models.SearchRequest(
-                    vector=models.NamedVector(name="code", vector=list(code_embedding)),
-                    with_payload=True,
+                models.Prefetch(
+                    query=list(code_embedding.flatten()),
+                    using="code",
                     limit=self.search_settings["limit"],
                 ),
             ],
+            query=models.FusionQuery(fusion=models.Fusion.RRF),
         )
         return results
