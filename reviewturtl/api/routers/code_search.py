@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from reviewturtl.logger import get_logger
-from reviewturtl.settings import get_settings
+from reviewturtl.settings import get_settings, get_4o_token_model
 from reviewturtl.api.route_types import (
     StandardResponse,
     CodeSearchRequest,
@@ -31,8 +31,12 @@ async def code_search(
             query=search_query, collection_name=collection_name
         )
         top_result = str(search_results.points[0].payload)
+        # get a better token model
+        model = get_4o_token_model()
         llm_response = code_search_agent(
-            search_query=search_query, context_related_to_search_query=top_result
+            search_query=search_query,
+            context_related_to_search_query=top_result,
+            model=model,
         ).response_for_search_query
         log.debug(f"Search results: {search_results}")
         return StandardResponse(
