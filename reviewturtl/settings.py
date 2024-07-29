@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
 def get_4o_token_model():
     return dspy.OpenAI(
-        model="gpt-4o", api_key=Settings().OPENAI_API_KEY, max_tokens=3500
+        model="gpt-4o", api_key=Settings().OPENAI_API_KEY, max_tokens=4096
     )
 
 
