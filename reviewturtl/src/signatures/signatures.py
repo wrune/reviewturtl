@@ -116,3 +116,22 @@ class SummarizerEvaluatorWithGT(dspy.Signature):
     rating_changes_in_tabular_description: float = dspy.OutputField(
         desc="A float rating between 1 and 5. 5 indicates the changes in tabular description is perfect with all the important parts of the file_diff and is closer to the changes_in_tabular_description_ground_truth"
     )
+
+
+class CodeSearchSignature(dspy.Signature):
+    __doc__ = """
+INSTRUCTIONS TO FOLLOW\n
+>>> FOR THE PROVIDED **search_query** answer it using the given **context_related_to_search_query**\n
+>>> USE **context_related_to_search_query** PROVIDED to ANSWER the **search_query** ONLY IF YOU THINK IT IS RELEVANT\n
+>>> RETURN YOUR ANSWER IN A MARKDOWN FORMAT\n
+>>> DO NOT MENTION YOUR THOUGHTS IN THE ANSWER\n
+>>> MAKE THIS ANSWER PRESENTABLE AS YOU ARE DIRECTLY COMMUNICATING WITH THE USER.\n
+>>> GIVE REFERENCES TO THE FILES WHICH HAVE BEEN USED TO GENERATE THE ANSWER.\n
+"""
+    search_query: str = dspy.InputField(desc="The search query")
+    context_related_to_search_query: str = dspy.InputField(
+        desc="The context related to search query"
+    )
+    response_for_search_query: str = dspy.OutputField(
+        desc="The response for the search query using the provided context"
+    )

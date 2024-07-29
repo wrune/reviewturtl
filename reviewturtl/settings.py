@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: Environment = Environment.Development
     OPENAI_API_KEY: str = ""
     APP_NAME: str = "reviewturtl"
+    QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_API_KEY: Optional[str] = None
 
     def is_dev(self):
         return self.ENVIRONMENT == Environment.Development
