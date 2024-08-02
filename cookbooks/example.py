@@ -17,6 +17,8 @@ def calculate_area(radius):
 
 # Class definition
 class Circle:
+    """This is circle class."""
+
     def __init__(self, radius):
         self.radius = radius
 
