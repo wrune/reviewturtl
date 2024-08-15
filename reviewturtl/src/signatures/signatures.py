@@ -53,10 +53,13 @@ class ReviewerSignature(dspy.Signature):
         ]
     """
     file_diff: str = dspy.InputField(
-        desc="The diff of the file",
+        desc="The diff of the file to be reviewed",
+    )
+    file_content: str = dspy.InputField(
+        desc="The content of the file",
     )
     line_by_line_comments: List[ReviewComments] = dspy.OutputField(
-        desc="The line by line review for the file",
+        desc="The line by line review for the file. Don't include the lines for which NO CHANGES are required.",
     )
 
 
