@@ -1,7 +1,7 @@
 import dspy
 from reviewturtl.src.signatures.docstrings import FILE_DIFF_CONTENT_EXPLANATION
 from reviewturtl.src.signatures.typed_pydantic_classes import ReviewComments
-from typing import List
+from typing import List, Dict, Any
 
 
 class SummarizerSignature(dspy.Signature):
@@ -139,3 +139,62 @@ INSTRUCTIONS TO FOLLOW\n
     response_for_search_query: str = dspy.OutputField(
         desc="The response for the search query using the provided context"
     )
+
+
+class ReactSignature(dspy.Signature):
+    __doc__ = """
+    INSTRUCTIONS TO FOLLOW\n
+    >>> Available agents are the agents that are available to answer the query. They are in a dictionary format with the key as the agent name and the value as the agent description\n
+    >>> Think step by step on what agents are best suited to answer the query\n
+    >>> Choose the best agents (can be more than one) to answer the query\n
+    >>> Return the agents in a list\n
+    """
+    conversation_history: str = dspy.InputField(desc="The conversation history so far")
+    query: str = dspy.InputField(
+        desc="The latest user query based on which the agent is to be chosen"
+    )
+    available_agents: Dict[str, str] = dspy.InputField(
+        desc="The Dictionary of available agents with the agent name as the key and the agent description as the value"
+    )
+    agents_to_use: List[str] = dspy.OutputField(desc="The List of agents to use")
+
+
+class FindArgumentsForAgent(dspy.Signature):
+    __doc__ = """
+    INSTRUCTIONS TO FOLLOW\n
+    Given the context , agent being used and the arguments to find for the agent find the arguments required for the agent being used
+    >>> 
+    """
+    context: Dict[str, str] = dspy.InputField(
+        desc="The context whatever is provided to be used for finding the arguments. There maybe lot of context provided to you be mindful of what agent is being used and what arguments are required for that agent"
+    )
+    agent_being_used_with_desc: Dict[str, str] = dspy.InputField(
+        desc="The agent being used with the agent name and the agent description"
+    )
+    arguments_to_find: List[str] = dspy.InputField(
+        desc="The arguments to find for the agent"
+    )
+    args_with_values: Dict[str, str] = dspy.OutputField(
+        desc="The mapping of the arguments to the agent with key as the argument name and value as the argument value"
+    )
+
+
+class FinalResponseConstructor(dspy.Signature):
+    __doc__ = """
+    INSTRUCTIONS TO FOLLOW\n
+    >>> Available agents are the agents that are available to answer the query. They are in a dictionary format with the key as the agent name and the value as the agent description\n
+    >>> All the prediction objects from the agents are provided to you\n
+    >>> Construct the final response to the query using the prediction objects from the agents\n
+    >>> Return the final response in a markdown format\n
+    """
+    conversation_history: str = dspy.InputField(desc="The conversation history so far")
+    query: str = dspy.InputField(
+        desc="The latest user query based on which the agent is to be chosen"
+    )
+    available_agents: Dict[str, str] = dspy.InputField(
+        desc="The Dictionary of available agents with the agent name as the key and the agent description as the value"
+    )
+    all_prediction_objects: Dict[str, Any] = dspy.InputField(
+        desc="This is a dictionary of agents with the agent name as the key and the prediction object from the agent as the value"
+    )
+    final_response: str = dspy.OutputField(desc="The final response to the query")
