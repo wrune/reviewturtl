@@ -7,16 +7,13 @@ from reviewturtl.api.route_types import (
     CodeSearchRequest,
     CodeSearchResponse,
 )
-from reviewturtl.src.code_search.search import TurtlSearch
-from reviewturtl.clients.qdrant_client import qdrant_client
+
 from reviewturtl.src.agents.code_search_agent import CodeSearchAgent
 
+code_search_agent = CodeSearchAgent()
 log = get_logger(__name__)
 router = APIRouter()
 settings = get_settings()
-
-search = TurtlSearch(qdrant_client=qdrant_client, search_settings={"limit": 5})
-code_search_agent = CodeSearchAgent()
 
 
 @router.post("/api/v1/code_search")
@@ -27,18 +24,14 @@ async def code_search(
     try:
         search_query = body.search_query
         collection_name = body.collection_name
-        search_results = search.search(
-            query=search_query, collection_name=collection_name
-        )
-        top_result = str(search_results.points[0].payload)
+
         # get a better token model
         model = get_4o_token_model()
         llm_response = code_search_agent(
             search_query=search_query,
-            context_related_to_search_query=top_result,
+            collection_name=collection_name,
             model=model,
         ).response_for_search_query
-        log.debug(f"Search results: {search_results}")
         return StandardResponse(
             data=CodeSearchResponse(response_for_search_query=llm_response)
         )
