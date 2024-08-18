@@ -1,0 +1,29 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Installations {
+    id            Int            @id
+    githubAccount String
+    pullRequests  pullRequests[]
+}
+
+enum Status {
+    ACTIVE
+    INACTIVE
+}
+
+model pullRequests {
+    id             String        @id @default(cuid())
+    prNumber       Int
+    repoName       String
+    Owner          String
+    installation   Installations @relation(fields: [installationId], references: [id])
+    installationId Int
+    turtleStatus   Status
+}
