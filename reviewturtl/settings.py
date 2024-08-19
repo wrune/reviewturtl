@@ -10,7 +10,7 @@ class Environment(str, Enum):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="/reviewturtl/.env")
+    model_config = SettingsConfigDict(env_file="reviewturtl/.env", extra="ignore")
     ENVIRONMENT: Environment = Environment.Development
     OPENAI_API_KEY: str = ""
     APP_NAME: str = "reviewturtl"
