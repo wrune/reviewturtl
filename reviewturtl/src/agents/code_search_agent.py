@@ -1,12 +1,13 @@
 from reviewturtl.src.programmes.programmes import (
     TypedChainOfThoughtProgramme as DspyProgramme,
 )
-from reviewturtl.src.signatures.signatures import CodeSearchSignature
+from reviewturtl.src.signatures.signatures import CodeSearchSignature, QueryRewriterSignature
 from reviewturtl.src.agents.base_agent import Agent
 from reviewturtl.src.code_search.search import TurtlSearch
 from reviewturtl.clients.qdrant_client import qdrant_client
 import dspy
 from typing import List, Dict
+import logging
 
 
 class CodeSearchAgent(Agent):
@@ -24,6 +25,7 @@ class CodeSearchAgent(Agent):
             qdrant_client=qdrant_client, search_settings={"limit": 5}
         )
         self.query_rewriter = dspy.TypedPredictor(QueryRewriterSignature)
+        self.logger = logging.getLogger(self.class_name)
 
     def forward(self, search_query: str, collection_name: str, conversation_history: List[Dict[str, str]], model=None):
         # Rewrite the query based on conversation history
@@ -58,16 +60,14 @@ class CodeSearchAgent(Agent):
         Returns:
             str: The rewritten query.
         """
+        self.logger.info(f"Original query: {query}")
         rewritten_query = self.query_rewriter(
             conversation_history=conversation_history,
             query=query
         )
+        self.logger.info(f"Rewritten query: {rewritten_query.rewritten_query}")
         return rewritten_query.rewritten_query
 
-class QueryRewriterSignature(dspy.Signature):
-    """Signature for query rewriting based on conversation history."""
-    conversation_history: List[Dict[str, str]] = dspy.InputField(desc="The conversation history")
-    query: str = dspy.InputField(desc="The original search query")
-    rewritten_query: str = dspy.OutputField(desc="The rewritten search query")
+
 
 __all__ = ["CodeSearchAgent"]
