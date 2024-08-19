@@ -10,6 +10,7 @@ class SummarizerRequest(BaseModel):
 
 class ReviewerRequest(BaseModel):
     file_diff: str
+    file_content: Optional[str] = None
     context: Optional[str] = None
 
 
