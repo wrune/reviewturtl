@@ -200,21 +200,23 @@ class FinalResponseConstructor(dspy.Signature):
     final_response: str = dspy.OutputField(desc="The final response to the query")
 
 class QueryRewriterSignature(dspy.Signature):
-    """
-    Signature for query rewriting based on conversation history.
+    __doc__ = f"""
+        {FILE_DIFF_CONTENT_EXPLANATION}
+        >> **Specific Instructions**\n
+            - The summary should be in English.\n
+            - Provide a short and factoid summary with a short description of the cumulative changes in **walkthrough**.\n
+            - Then give the summary of changed content per file in a tabular format in markdown table for **changes_in_tabular_description**.\
+            - Do not mention which lines have been changed.\n
+            - The change summary in the table should be short and concise.\n
+        ### Example:\n
+        walkthrough:\n
+        The method and logic to calculate the area of the triangle has been changed.\n
+        changes_in_tabular_description:\n
+        | File Name | Changes |
+        | --------- | -------- |
+        | test.txt  | The method to calculate the area of the triangle has been changed. |
+        | test2.txt | The logic to calculate the area of the triangle has been changed. |
 
-    This signature is used to improve search queries by considering the context
-    of the ongoing conversation. It takes the original query and the conversation
-    history as inputs, and produces a rewritten query that is potentially more
-    relevant and specific to the user's intent.
-
-    Inputs:
-    - conversation_history: A list of dictionaries representing the conversation so far.
-    - query: The original search query provided by the user.
-
-    Output:
-    - rewritten_query: An improved version of the original query, taking into account
-      the context from the conversation history.
     """
     conversation_history: List[Dict[str, str]] = dspy.InputField(desc="The conversation history")
     query: str = dspy.InputField(desc="The original search query")

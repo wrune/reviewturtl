@@ -24,7 +24,6 @@ class CodeSearchAgent(Agent):
         self.code_search = TurtlSearch(
             qdrant_client=qdrant_client, search_settings={"limit": 5}
         )
-        self.query_rewriter = dspy.TypedPredictor(QueryRewriterSignature)
         self.logger = logging.getLogger(self.class_name)
 
     def forward(self, search_query: str, collection_name: str, conversation_history: List[Dict[str, str]], model=None):
