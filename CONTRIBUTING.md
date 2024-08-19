@@ -114,3 +114,64 @@ agent_dict = {
 ```
 
 Remember to follow the existing code structure and naming conventions when adding new components to the project.
+
+## Adding Routes and Data Models to the API
+
+When expanding the API functionality in ReviewTurtl, you'll often need to add new routes and data models. Here's a guide on how to do this effectively:
+
+### Adding New Routes
+
+1. Locate the appropriate router file in the `reviewturtl/api/routers/` directory.
+2. Define a new route using the `@router.post()`, `@router.get()`, etc. decorators.
+3. Implement the route handler function, ensuring it accepts the necessary parameters and returns the correct response type.
+
+Example:
+```python
+@router.post("/api/v1/new_endpoint")
+async def new_endpoint(request: Request, body: NewEndpointRequest) -> StandardResponse:
+    try:
+        # Implement your logic here
+        result = process_request(body)
+        return StandardResponse(data=NewEndpointResponse(result=result))
+    except Exception as e:
+        log.error(f"Error in new endpoint: {e}")
+        return JSONResponse(
+            status_code=400,
+            content=StandardResponse(error=str(e)).model_dump(),
+        )
+```
+
+### Defining Route Handlers
+
+1. Implement the main logic of your endpoint in the route handler function.
+2. Use appropriate error handling and logging.
+3. Return a `StandardResponse` object with the processed data or error information.
+
+### Updating the Router
+
+1. If you're adding a completely new feature, you might need to create a new router file.
+2. In this case, create a new file in the `reviewturtl/api/routers/` directory.
+3. Define the router and implement your routes as described above.
+4. Import and include the new router in the main FastAPI app (usually in `main.py` or a central router file).
+
+### Writing Data Models with Pydantic
+
+1. Open the `reviewturtl/api/route_types.py` file.
+2. Define new request and response models using Pydantic's `BaseModel`.
+3. Include all necessary fields with their types.
+4. Add any validation or additional Pydantic features as needed.
+
+Example:
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class NewEndpointRequest(BaseModel):
+    input_data: str
+    optional_param: Optional[int] = None
+
+class NewEndpointResponse(BaseModel):
+    result: str
+```
+
+Remember to follow RESTful API design principles, use clear and consistent naming conventions, and provide appropriate documentation for your new routes and models.
