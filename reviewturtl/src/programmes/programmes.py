@@ -1,5 +1,4 @@
 import dspy
-from reviewturtl.src.signatures.signatures import QueryRewriterSignature
 
 class TypedChainOfThoughtProgramme(dspy.Module):
     def __init__(self, signature):
@@ -13,9 +12,9 @@ class TypedChainOfThoughtProgramme(dspy.Module):
         return self.predictor(**kwargs)
 
 class QueryRewriterProgramme(dspy.Module):
-    def __init__(self):
+    def __init__(self, signature):
         super().__init__()
-        self.predictor = dspy.TypedPredictor(QueryRewriterSignature)
+        self.predictor = dspy.TypedPredictor(signature)
 
     def forward(self, model=None, **kwargs):
         if model:
