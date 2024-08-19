@@ -24,7 +24,7 @@ async def code_search(
     try:
         search_query = body.search_query
         collection_name = body.collection_name
-        conversation_history = body.conversation_history
+        conversation_history = str(body.conversation_history)
 
         # get a better token model
         model = get_4o_token_model()
@@ -39,11 +39,6 @@ async def code_search(
             conversation_history=conversation_history,
             model=model,
         )
-
-        # Log the rewritten query (assuming it's available in the result)
-        if hasattr(result, 'rewritten_query'):
-            log.info(f"Rewritten search query: {result.rewritten_query}")
-
         llm_response = result.response_for_search_query
         return StandardResponse(
             data=CodeSearchResponse(response_for_search_query=llm_response)

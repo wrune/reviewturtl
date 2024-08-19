@@ -1,5 +1,6 @@
 import dspy
 
+
 class TypedChainOfThoughtProgramme(dspy.Module):
     def __init__(self, signature):
         super().__init__()
@@ -10,6 +11,7 @@ class TypedChainOfThoughtProgramme(dspy.Module):
             with dspy.context(lm=model):
                 return self.predictor(**kwargs)
         return self.predictor(**kwargs)
+
 
 class TypedProgramme(dspy.Module):
     def __init__(self, signature):

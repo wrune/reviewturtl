@@ -31,7 +31,7 @@ class CodeSearchResponse(BaseModel):
 class CodeSearchRequest(BaseModel):
     search_query: str
     collection_name: str
-    conversation_history: Dict[str, str]
+    conversation_history: List[Dict[str, str]]
 
 
 class StandardResponse(BaseModel):
