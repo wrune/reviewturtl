@@ -201,16 +201,22 @@ class FinalResponseConstructor(dspy.Signature):
 
 class QueryRewriterSignature(dspy.Signature):
     __doc__ = """
-    A signature for query rewriting functionality.
+    Rewrite the given query based on the conversation history to improve search results.
 
-    This class defines the input and output fields for a query rewriter,
-    which takes into account the conversation history to improve search results.
+    Instructions for the LLM:
+    1. Analyze the conversation history to understand the context.
+    2. Identify key topics, concepts, and user intentions from the history.
+    3. Expand or modify the original query to incorporate relevant context.
+    4. Ensure the rewritten query is more specific and targeted.
+    5. Maintain the original intent of the query while enhancing its effectiveness.
+    6. Do not introduce new topics that are not related to the original query or conversation.
+    7. Keep the rewritten query concise and focused.
 
     Attributes:
         conversation_history (str): The conversation history as a string.
         query (str): The original search query.
-        rewritten_query (str): The rewritten search query.
+        rewritten_query (str): The improved, context-aware search query.
     """
     conversation_history: str = dspy.InputField(desc="The conversation history as a string")
     query: str = dspy.InputField(desc="The original search query")
-    rewritten_query: str = dspy.OutputField(desc="The rewritten search query")
+    rewritten_query: str = dspy.OutputField(desc="The rewritten, context-aware search query")
