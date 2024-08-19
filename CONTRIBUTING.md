@@ -45,3 +45,133 @@ Work in Progress pull requests are also welcome to get feedback early on, or if 
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
 - [GitHub Help](https://help.github.com)
 
+## Writing Signatures, Programmes, and Integrating New Agents
+
+### Writing Signatures
+
+Signatures in ReviewTurtl define the input and output fields for various components. To write a new signature:
+
+1. Create a new class that inherits from `dspy.Signature`.
+2. Define input fields using `dspy.InputField()`.
+3. Define output fields using `dspy.OutputField()`.
+4. Add a docstring to describe the signature's purpose and usage.
+
+Example:
+```python
+class MyNewSignature(dspy.Signature):
+    """
+    Description of what this signature does.
+    """
+    input_field = dspy.InputField(desc="Description of the input")
+    output_field = dspy.OutputField(desc="Description of the output")
+```
+
+### Writing Programmes
+
+Programmes in ReviewTurtl are modules that use signatures to process data. To write a new programme:
+
+1. Create a new class that inherits from `dspy.Module`.
+2. Initialize the class with a signature in the `__init__` method.
+3. Implement the `forward` method to define the programme's behavior.
+
+Example:
+```python
+class MyNewProgramme(dspy.Module):
+    def __init__(self, signature):
+        super().__init__()
+        self.predictor = dspy.TypedPredictor(signature)
+
+    def forward(self, model=None, **kwargs):
+        if model:
+            with dspy.context(lm=model):
+                return self.predictor(**kwargs)
+        return self.predictor(**kwargs)
+```
+
+### Integrating New Agents with the React Agent
+
+To integrate a new agent with the React agent:
+
+1. Create your new agent class inheriting from `Agent`.
+2. Implement the required methods, including `__init__` and `forward`.
+3. Add your agent to the `agent_dict` in `reviewturtl/src/agents/utils.py`.
+4. Update the `ReactAgent` class in `react_agent.py` to handle your new agent if necessary.
+
+Example of adding a new agent to `agent_dict`:
+```python
+from .my_new_agent import MyNewAgent
+
+agent_dict = {
+    # ... existing agents ...
+    "MyNewAgent": {
+        "class_name": "MyNewAgent",
+        "class_object": MyNewAgent(),
+        "description": "Description of what MyNewAgent does",
+        "input_variables": ["input1", "input2"],
+        "output_variables": ["output"],
+    },
+}
+```
+
+Remember to follow the existing code structure and naming conventions when adding new components to the project.
+
+## Adding Routes and Data Models to the API
+
+When expanding the API functionality in ReviewTurtl, you'll often need to add new routes and data models. Here's a guide on how to do this effectively:
+
+### Adding New Routes
+
+1. Locate the appropriate router file in the `reviewturtl/api/routers/` directory.
+2. Define a new route using the `@router.post()`, `@router.get()`, etc. decorators.
+3. Implement the route handler function, ensuring it accepts the necessary parameters and returns the correct response type.
+
+Example:
+```python
+@router.post("/api/v1/new_endpoint")
+async def new_endpoint(request: Request, body: NewEndpointRequest) -> StandardResponse:
+    try:
+        # Implement your logic here
+        result = process_request(body)
+        return StandardResponse(data=NewEndpointResponse(result=result))
+    except Exception as e:
+        log.error(f"Error in new endpoint: {e}")
+        return JSONResponse(
+            status_code=400,
+            content=StandardResponse(error=str(e)).model_dump(),
+        )
+```
+
+### Defining Route Handlers
+
+1. Implement the main logic of your endpoint in the route handler function.
+2. Use appropriate error handling and logging.
+3. Return a `StandardResponse` object with the processed data or error information.
+
+### Updating the Router
+
+1. If you're adding a completely new feature, you might need to create a new router file.
+2. In this case, create a new file in the `reviewturtl/api/routers/` directory.
+3. Define the router and implement your routes as described above.
+4. Import and include the new router in the main FastAPI app (usually in `main.py` or a central router file).
+
+### Writing Data Models with Pydantic
+
+1. Open the `reviewturtl/api/route_types.py` file.
+2. Define new request and response models using Pydantic's `BaseModel`.
+3. Include all necessary fields with their types.
+4. Add any validation or additional Pydantic features as needed.
+
+Example:
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class NewEndpointRequest(BaseModel):
+    input_data: str
+    optional_param: Optional[int] = None
+
+class NewEndpointResponse(BaseModel):
+    result: str
+```
+
+Remember to follow RESTful API design principles, use clear and consistent naming conventions, and provide appropriate documentation for your new routes and models.

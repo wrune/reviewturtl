@@ -24,19 +24,27 @@ async def code_search(
     try:
         search_query = body.search_query
         collection_name = body.collection_name
+        conversation_history = str(body.conversation_history)
 
         # get a better token model
         model = get_4o_token_model()
-        llm_response = code_search_agent(
+
+        # Log the original query
+        log.info(f"Original search query: {search_query}")
+
+        # Call the code search agent with conversation history
+        result = code_search_agent(
             search_query=search_query,
             collection_name=collection_name,
+            conversation_history=conversation_history,
             model=model,
-        ).response_for_search_query
+        )
+        llm_response = result.response_for_search_query
         return StandardResponse(
             data=CodeSearchResponse(response_for_search_query=llm_response)
         )
     except Exception as e:
-        log.error(f"Error summarizing code chunk: {e}")
+        log.error(f"Error in code search: {e}")
         return JSONResponse(
             status_code=400,
             content=StandardResponse(error=str(e)).model_dump(),
