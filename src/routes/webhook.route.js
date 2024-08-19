@@ -9,7 +9,6 @@ const webhookRouter = Router();
 webhookRouter.post(
   "/",
   asyncHandler(async (req, res) => {
-    console.log("req", req);
     const event = req.headers["x-github-event"];
     const installationId = req.body.installation?.id;
     await handleWebhookEvent(req.body, event, installationId);

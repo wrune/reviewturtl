@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 import config from "../constants/config.js";
 import { turtle } from "./turtle.service.js";
+import fs from "fs";
 
 const createOctokit = (installationId) =>
   new Octokit({
@@ -31,14 +32,23 @@ const handlePullRequestReview = async (payload, installationId) => {
 };
 
 const handlePullRequestSummary = async (payload, installationId) => {
-  const response = await turtle.summarise(payload);
   const octokit = createOctokit(installationId);
-  // Implement your PR handling logic here
-  octokit.pulls.createComment({
+  const res = await octokit.pulls.get({
     owner: payload.repository.owner.login,
     repo: payload.repository.name,
     pull_number: payload.pull_request.number,
-    body: response.summary,
+    mediaType: {
+      format: "diff",
+    },
+  });
+  // console.log(res.data);
+  const response = await turtle.summerize(res.data);
+
+  await octokit.pulls.createReview({
+    owner: payload.repository.owner.login,
+    repo: payload.repository.name,
+    pull_number: payload.pull_request.number,
+    body: response.data.tabular_summary,
     event: "COMMENT",
   });
 
