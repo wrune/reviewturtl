@@ -200,24 +200,17 @@ class FinalResponseConstructor(dspy.Signature):
     final_response: str = dspy.OutputField(desc="The final response to the query")
 
 class QueryRewriterSignature(dspy.Signature):
-    __doc__ = f"""
-        {FILE_DIFF_CONTENT_EXPLANATION}
-        >> **Specific Instructions**\n
-            - The summary should be in English.\n
-            - Provide a short and factoid summary with a short description of the cumulative changes in **walkthrough**.\n
-            - Then give the summary of changed content per file in a tabular format in markdown table for **changes_in_tabular_description**.\
-            - Do not mention which lines have been changed.\n
-            - The change summary in the table should be short and concise.\n
-        ### Example:\n
-        walkthrough:\n
-        The method and logic to calculate the area of the triangle has been changed.\n
-        changes_in_tabular_description:\n
-        | File Name | Changes |
-        | --------- | -------- |
-        | test.txt  | The method to calculate the area of the triangle has been changed. |
-        | test2.txt | The logic to calculate the area of the triangle has been changed. |
+    __doc__ = """
+    A signature for query rewriting functionality.
 
+    This class defines the input and output fields for a query rewriter,
+    which takes into account the conversation history to improve search results.
+
+    Attributes:
+        conversation_history (str): The conversation history as a string.
+        query (str): The original search query.
+        rewritten_query (str): The rewritten search query.
     """
-    conversation_history: List[Dict[str, str]] = dspy.InputField(desc="The conversation history")
+    conversation_history: str = dspy.InputField(desc="The conversation history as a string")
     query: str = dspy.InputField(desc="The original search query")
     rewritten_query: str = dspy.OutputField(desc="The rewritten search query")
