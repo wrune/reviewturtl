@@ -8,6 +8,7 @@ Hi there! We're thrilled that you'd like to contribute to this project. Your hel
 
 Please note that this project is released with a [Contributor Code of Conduct][code-of-conduct]. By participating in this project you agree to abide by its terms.
 
+
 ## Issues and PRs
 
 If you have suggestions for how this project could be improved, or want to report a bug, open an issue! We'd love all and any contributions. If you have questions, too, we'd love to hear them.
@@ -31,9 +32,16 @@ Here are a few things you can do that will increase the likelihood of your pull 
 - Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 
 Work in Progress pull requests are also welcome to get feedback early on, or if there is something blocked you.
+## Setting up the environment
+1. We use `poetry` to manage the dependencies and the environment. In a virtual environment install the dependencies using `poetry install`
+
+2. Create a `.env` file in the `reviewturtl` directory and add the following environment variables:
+- `OPENAI_API_KEY`: The API key for the OpenAI API.
+- `ENVIRONMENT`: The environment you are working in.
 
 ## Resources
 
 - [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
 - [GitHub Help](https://help.github.com)
+
