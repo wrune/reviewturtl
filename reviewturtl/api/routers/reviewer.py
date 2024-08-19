@@ -22,15 +22,16 @@ async def review_code_chunk(
 ) -> StandardResponse:
     try:
         file_diff_content = body.file_diff
-        prediction_object = reviewer(file_diff_content)
+        file_content = body.file_content
+        prediction_object = reviewer(file_diff_content, file_content)
         log.debug(f"Review comments: {prediction_object.line_by_line_comments}")
         return StandardResponse(
             data=ReviewerData(
                 line_by_line_comments=prediction_object.line_by_line_comments,
             )
-            )
+        )
     except Exception as e:
-        log.error(f"Error summarizing code chunk: {e}")
+        log.error(f"Error reviewing code chunk: {e}")
         return JSONResponse(
             status_code=400,
             content=StandardResponse(error=str(e)).model_dump(),
