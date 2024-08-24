@@ -48,6 +48,14 @@ class TurtlPreprocessor:
         with open(methods_dump_path) as f:
             return json.load(f)
 
+    def get_methods_from_file_content(self, file_contents: List[str]):
+        """
+        Loads the methods from the file content
+        Returns:
+            List[Dict[str, Any]]: List of methods
+        """
+        file_contents
+
     @staticmethod
     def preprocess_methods_for_text_embedding(methods: List[Dict[str, Any]]):
         """
