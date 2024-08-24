@@ -1,9 +1,13 @@
 import json
 from typing import List, Dict, Any, Optional
-from reviewturtl.src.code_search.utils import convert_chunk_to_text
+from reviewturtl.src.code_search.utils import (
+    convert_chunk_to_text,
+    extract_nodes_from_files,
+)
 from fastembed import TextEmbedding
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from reviewturtl.src.data_models import ExtractedNode
 
 
 class TurtlPreprocessor:
@@ -48,13 +52,15 @@ class TurtlPreprocessor:
         with open(methods_dump_path) as f:
             return json.load(f)
 
-    def get_methods_from_file_content(self, file_contents: List[str]):
+    def get_methods_from_file_content(
+        self, file_contents: List[Dict[str, str]]
+    ) -> List[ExtractedNode]:
         """
         Loads the methods from the file content
         Returns:
             List[Dict[str, Any]]: List of methods
         """
-        file_contents
+        return extract_nodes_from_files(file_contents)
 
     @staticmethod
     def preprocess_methods_for_text_embedding(methods: List[Dict[str, Any]]):

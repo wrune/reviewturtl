@@ -2,6 +2,8 @@ from reviewturtl.src.code_search.preprocessor import TurtlPreprocessor
 from qdrant_client import QdrantClient, models
 import uuid
 from logging import getLogger
+from typing import Optional, Any
+from reviewturtl.src.data_models import IndexingMode
 
 logger = getLogger(__name__)
 
@@ -9,10 +11,10 @@ logger = getLogger(__name__)
 class TurtlIndexer(TurtlPreprocessor):
     def __init__(
         self,
-        methods_dump_path: str,
         qdrant_client: QdrantClient,
         text_embedding_model=None,
         code_embedding_model=None,
+        methods_dump_path: Optional[str] = None,
     ):
         super().__init__(methods_dump_path, text_embedding_model, code_embedding_model)
         self.qdrant_client = qdrant_client
@@ -31,12 +33,21 @@ class TurtlIndexer(TurtlPreprocessor):
         code_embeddings = self.get_code_embeddings(code_representations)
         return text_embeddings, code_embeddings
 
-    def index(self, collection_name: str):
+    def index(
+        self,
+        collection_name: str,
+        mode: Optional[str] = None,
+        file_metadata: Optional[Any] = None,
+    ):
         """
         Index documents in Qdrant
         """
-        # get methods from the specified path
-        methods = self.get_methods(self.methods_dump_path)
+        if mode is None:
+            # get methods from the specified path
+            methods = self.get_methods(self.methods_dump_path)
+        elif mode == IndexingMode.PARSE_FROM_FILE.value:
+            file_metadata = [meta.model_dump() for meta in file_metadata]
+            methods = self.get_methods_from_file_content(file_metadata)
         # preprocess methods for indexing
         text_embeddings, code_embeddings = self.preprocess_methods_for_indexing(methods)
         # Check if collection exists
