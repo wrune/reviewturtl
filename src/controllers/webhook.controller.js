@@ -12,23 +12,39 @@ async function handleWebhookEvent(body, event, installationId) {
   // if it was an action command, then we need to check if the user has the permission to perform the action.
   switch (event) {
     case "pull_request":
-      // const actions = parseAction(body);
-      // action could be of the type { type: "up", "down", "review", "summary", "help" }, these action will only work for a PR.
-      const turtleActions = ["summary"];
-      for (const action of turtleActions) {
-        switch (action) {
-          case "summary":
-            await handlePullRequestSummary(body, installationId);
+      // Grab the action from the payload
+      const action = body.action;
+
+      switch (action) {
+        case "opened":
+          // Pull out the turtle tasks from the payload, still need to implement this.
+          const turtleTasks = ["summary"]; // could be an array of tasks like ["summary", "review"]
+          for (const task of turtleTasks) {
+            switch (task) {
+              case "summary":
+                await handlePullRequestSummary(body, installationId);
+                break;
+              case "review":
+                await handlePullRequestReview(body, installationId);
+                break;
+            }
             break;
-          case "review":
-            await handlePullRequestReview(body, installationId);
-            break;
-        }
+          }
+
+        case "review_requested":
+          // Implement your PR review requested handling logic here
+          break;
+
+        case "closed":
+          // Implement your PR closed handling logic here
+          break;
       }
       break;
+
     case "installation":
       await handleInstallation(body);
       break;
+
     case "issues":
       await handleIssue(body, installationId);
       break;

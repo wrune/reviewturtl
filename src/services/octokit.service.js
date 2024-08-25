@@ -44,11 +44,13 @@ const handlePullRequestSummary = async (payload, installationId) => {
   // console.log(res.data);
   const response = await turtle.summerize(res.data);
 
+  const body = `## Walkthrough\n\n${response.data.walkthrough}\n\n## Tabular Summary\n\n${response.data.tabular_summary}`;
+
   await octokit.pulls.createReview({
     owner: payload.repository.owner.login,
     repo: payload.repository.name,
     pull_number: payload.pull_request.number,
-    body: response.data.tabular_summary,
+    body: body,
     event: "COMMENT",
   });
 
@@ -60,6 +62,42 @@ const handlePullRequestSummary = async (payload, installationId) => {
 const handleInstallation = async (payload) => {
   // Implement your installation handling logic here
   console.log(`New installation: ${payload.installation.id}`);
+  // list all repositories for the installation
+  const octokit = createOctokit(payload.installation.id);
+  const { data } = await octokit.apps.listReposAccessibleToInstallation();
+  console.log(data);
+  data.repositories.forEach(async (repo) => {
+    await listAllContent(octokit, repo);
+  });
+};
+
+const listAllContent = async (octokit, repo) => {
+  const contents = await octokit.repos.getContent({
+    owner: repo.owner.login,
+    repo: repo.name,
+  });
+  const res = contents.data.forEach(async (content) => {
+    const val = {
+      repo: repo.name,
+      action: "ADD",
+      contents: [
+        {
+          name: content.name,
+          path: content.path,
+          type: content.type,
+          code: await fetchFileContentFromDownloadUrl(content.download_url),
+        },
+      ],
+    };
+    console.log(val);
+    return val;
+  });
+  console.log(res);
+};
+
+const fetchFileContentFromDownloadUrl = async (downloadUrl) => {
+  const response = await fetch(downloadUrl);
+  return response.text();
 };
 
 const handleIssue = async (payload, installationId) => {
