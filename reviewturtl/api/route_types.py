@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Any, List, Union
+from typing import Optional, Any, List, Union, Dict
 from reviewturtl.src.signatures.signatures import ReviewComments
 
 
@@ -10,6 +10,7 @@ class SummarizerRequest(BaseModel):
 
 class ReviewerRequest(BaseModel):
     file_diff: str
+    file_content: Optional[str] = None
     context: Optional[str] = None
 
 
@@ -30,6 +31,7 @@ class CodeSearchResponse(BaseModel):
 class CodeSearchRequest(BaseModel):
     search_query: str
     collection_name: str
+    conversation_history: List[Dict[str, str]]
 
 
 class StandardResponse(BaseModel):
