@@ -1,12 +1,10 @@
 import json
 from typing import List, Dict, Any, Optional
-from reviewturtl.src.code_search.utils import (
-    convert_chunk_to_text,
-    extract_nodes_from_files,
-)
+from reviewturtl.src.code_search.utils import convert_chunk_to_text
 from fastembed import TextEmbedding
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from reviewturtl.src.code_search.file_parser import TurtlFileParser
 from reviewturtl.src.data_models import ExtractedNode
 
 
@@ -25,6 +23,7 @@ class TurtlPreprocessor:
             code_embedding_model (str): Embedding model to use for code
         """
         self.methods_dump_path = methods_dump_path
+        self.file_parser = TurtlFileParser()
         if text_embedding_model is None:
             # Default embedding model
             self.text_embedding_model = TextEmbedding(
@@ -49,6 +48,8 @@ class TurtlPreprocessor:
         Returns:
             List[Dict[str, Any]]: List of methods
         """
+        if methods_dump_path is None:
+            raise ValueError("methods_dump_path is required")
         with open(methods_dump_path) as f:
             return json.load(f)
 
@@ -60,7 +61,7 @@ class TurtlPreprocessor:
         Returns:
             List[Dict[str, Any]]: List of methods
         """
-        return extract_nodes_from_files(file_contents)
+        return self.file_parser.parse_files(file_contents)
 
     @staticmethod
     def preprocess_methods_for_text_embedding(methods: List[Dict[str, Any]]):
