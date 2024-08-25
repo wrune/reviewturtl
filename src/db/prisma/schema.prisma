@@ -1,0 +1,48 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model installations {
+    id           Int             @id
+    account      String
+    pull_request pull_requests[]
+    repo         repo[]
+}
+
+model repo {
+    id              String          @id @default(cuid())
+    repo_name       String
+    owner           String
+    default_branch  String
+    installation    installations   @relation(fields: [installation_id], references: [id])
+    installation_id Int
+    file_metadata   file_metadata[]
+}
+
+enum status {
+    ACTIVE
+    INACTIVE
+}
+
+model pull_requests {
+    id              String        @id @default(cuid())
+    pr_number       Int
+    repo_name       String
+    owner           String
+    installation    installations @relation(fields: [installation_id], references: [id])
+    installation_id Int
+    turtle_status   status
+}
+
+model file_metadata {
+    id         String  @id @default(uuid())
+    repo_id    String
+    repo       repo    @relation(fields: [repo_id], references: [id])
+    file_path  String
+    is_indexed Boolean
+}
