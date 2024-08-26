@@ -128,7 +128,7 @@ def extract_nodes(tree, source_code, source_code_path):
         Returns:
             dict: The context.
         """
-        file_path = Path(source_code_path).resolve()
+        file_path = source_code_path
         file_name = Path(file_path).name
         module = get_module_name(file_path)
         struct_name = get_struct_name(node)

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, Any, List, Union, Dict
+from enum import Enum
 from reviewturtl.src.signatures.signatures import ReviewComments
 from reviewturtl.src.data_models import IndexingMode
 
@@ -35,14 +36,23 @@ class CodeSearchRequest(BaseModel):
     conversation_history: List[Dict[str, str]]
 
 
+class FileAction(Enum):
+    ADD = "add"
+    DELETE = "delete"
+    MODIFY = "modify"
+
+
 class FileMetadata(BaseModel):
     file_path: str
     file_content: str
+    action: FileAction
+    id: Optional[str] = None
 
 
 class IndexCodeRequest(BaseModel):
     collection_name: str
     mode: Optional[str] = IndexingMode.PARSE_FROM_FILE.value
+    repo_id: Optional[str] = None
     file_metadata: List[FileMetadata]
 
 

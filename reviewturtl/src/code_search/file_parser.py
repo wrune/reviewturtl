@@ -35,5 +35,7 @@ class TurtlFileParser:
             source_code = file["file_content"].encode("utf-8")
             tree = python_parser.parse(source_code)
             results = extract_nodes(tree, source_code, file_path)
+            for result in results:
+                result["file_id"] = file["id"]
             all_results.extend(results)
         return all_results

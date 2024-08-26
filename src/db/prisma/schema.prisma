@@ -2,6 +2,12 @@ generator client {
     provider = "prisma-client-js"
 }
 
+generator python_client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = "5"
+  interface            = "asyncio"
+}
+
 datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
@@ -15,7 +21,7 @@ model installations {
 }
 
 model repo {
-    id              String          @id @default(cuid())
+    id              String          @id @default(uuid())
     repo_name       String
     owner           String
     default_branch  String
@@ -30,7 +36,7 @@ enum status {
 }
 
 model pull_requests {
-    id              String        @id @default(cuid())
+    id              String        @id @default(uuid())
     pr_number       Int
     repo_name       String
     owner           String
@@ -44,5 +50,5 @@ model file_metadata {
     repo_id    String
     repo       repo    @relation(fields: [repo_id], references: [id])
     file_path  String
-    is_indexed Boolean
+    is_indexed Boolean @default(false)
 }
