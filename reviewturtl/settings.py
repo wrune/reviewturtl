@@ -10,12 +10,13 @@ class Environment(str, Enum):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="reviewturtl/.env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     ENVIRONMENT: Environment = Environment.Development
     OPENAI_API_KEY: str = ""
     APP_NAME: str = "reviewturtl"
-    QDRANT_URL: str = "http://localhost:6343"
+    QDRANT_URL: str = "http://localhost:6333"
     QDRANT_API_KEY: Optional[str] = None
+    DATABASE_URL: str = ""
 
     def is_dev(self):
         return self.ENVIRONMENT == Environment.Development
