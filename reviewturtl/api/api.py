@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from reviewturtl.settings import get_settings, initialize_dspy_with_configs
 from reviewturtl.api.routers import summarizer, reviewer, code_search, index_code
+from reviewturtl.api.middlewares import ALL_MIDDLEWARES
 
 cfg = get_settings()
 initialize_dspy_with_configs()
-app = FastAPI()
+app = FastAPI(middleware=ALL_MIDDLEWARES)
 
 
 @app.get("/api/health")

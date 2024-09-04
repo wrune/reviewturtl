@@ -22,6 +22,7 @@ async def code_search(
     body: CodeSearchRequest,
 ) -> StandardResponse:
     try:
+        request_id = request.headers.get("X-Request-ID")
         search_query = body.search_query
         collection_name = body.collection_name
         conversation_history = str(body.conversation_history)
@@ -37,6 +38,7 @@ async def code_search(
             search_query=search_query,
             collection_name=collection_name,
             conversation_history=conversation_history,
+            request_id=request_id,
             model=model,
         )
         llm_response = result.response_for_search_query
@@ -44,7 +46,7 @@ async def code_search(
             data=CodeSearchResponse(response_for_search_query=llm_response)
         )
     except Exception as e:
-        log.error(f"Error in code search: {e}")
+        log.error(f"Error in code search: {e}", request_id=request_id, exc_info=True)
         return JSONResponse(
             status_code=400,
             content=StandardResponse(error=str(e)).model_dump(),
