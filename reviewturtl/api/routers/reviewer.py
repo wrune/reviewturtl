@@ -21,9 +21,12 @@ async def review_code_chunk(
     body: ReviewerRequest,
 ) -> StandardResponse:
     try:
+        request_id = request.headers.get("X-Request-ID")
         file_diff_content = body.file_diff
         file_content = body.file_content
-        prediction_object = reviewer(file_diff_content, file_content)
+        prediction_object = reviewer(
+            file_diff_content, file_content, request_id=request_id
+        )
         log.debug(f"Review comments: {prediction_object.line_by_line_comments}")
         return StandardResponse(
             data=ReviewerData(
@@ -31,7 +34,11 @@ async def review_code_chunk(
             )
         )
     except Exception as e:
-        log.error(f"Error reviewing code chunk: {e}")
+        log.error(
+            f"Error reviewing code chunk: {e}",
+            request_id=request_id,
+            exc_info=True,
+        )
         return JSONResponse(
             status_code=400,
             content=StandardResponse(error=str(e)).model_dump(),

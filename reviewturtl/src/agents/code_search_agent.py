@@ -40,11 +40,12 @@ class CodeSearchAgent(Agent):
         search_query: str,
         collection_name: str,
         conversation_history: List[Dict[str, str]],
+        request_id: str = None,
         model=None,
     ):
         # Rewrite the query based on conversation history
         rewritten_query = self.rewrite_query(
-            search_query, conversation_history, model=model
+            search_query, conversation_history, request_id=request_id, model=model
         )
 
         # Search for the code using hybrid search agent with the rewritten query
@@ -57,17 +58,33 @@ class CodeSearchAgent(Agent):
         self.prediction_object = self.programme.forward(
             search_query=rewritten_query,
             context_related_to_search_query=top_result,
+            request_id=request_id,
             model=model,
         )
         return self.prediction_object
 
-    def __call__(self, search_query, collection_name, conversation_history, model=None):
+    def __call__(
+        self,
+        search_query,
+        collection_name,
+        conversation_history,
+        request_id: str = None,
+        model=None,
+    ):
         return self.forward(
-            search_query, collection_name, conversation_history, model=model
+            search_query,
+            collection_name,
+            conversation_history,
+            request_id=request_id,
+            model=model,
         )
 
     def rewrite_query(
-        self, query: str, conversation_history: List[Dict[str, str]], model=None
+        self,
+        query: str,
+        conversation_history: List[Dict[str, str]],
+        request_id: str = None,
+        model=None,
     ) -> str:
         """
         Rewrites the query based on conversation history using TypedPredictor.
@@ -81,7 +98,10 @@ class CodeSearchAgent(Agent):
         """
         log.debug(f"Original query: {query}")
         rewritten_query = self.query_rewriter.forward(
-            conversation_history=conversation_history, query=query, model=model
+            conversation_history=conversation_history,
+            query=query,
+            request_id=request_id,
+            model=model,
         )
         log.debug(f"Rewritten query: {rewritten_query.rewritten_query}")
         return rewritten_query.rewritten_query

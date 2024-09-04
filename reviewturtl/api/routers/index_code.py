@@ -59,6 +59,7 @@ async def index_code(
     try:
         # Ensure initialization is complete before proceeding
         await initialization_complete.wait()
+        request_id = request.headers.get("X-Request-ID")
         collection_name = body.collection_name
         mode = body.mode
         file_metadata = body.file_metadata
@@ -119,7 +120,7 @@ async def index_code(
             )
         )
     except Exception as e:
-        log.error(f"Error in code search: {e}", exc_info=True)
+        log.error(f"Error in code search: {e}", request_id=request_id, exc_info=True)
         return JSONResponse(
             status_code=400,
             content=StandardResponse(error=str(e)).model_dump(),

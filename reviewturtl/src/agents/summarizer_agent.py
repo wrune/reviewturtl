@@ -13,9 +13,9 @@ class SummarizerAgent(Agent):
         self.desc = "A summarizer agent that summarizes the changes in a file diff."
         super().__init__(DspyProgramme(signature=SummarizerSignature))
 
-    def forward(self, file_diff, model=None):
+    def forward(self, file_diff, model=None, request_id: str = None):
         self.prediction_object = self.programme.forward(
-            file_diff=file_diff, model=model
+            file_diff=file_diff, model=model, request_id=request_id
         )
         return self.prediction_object
 
@@ -25,8 +25,8 @@ class SummarizerAgent(Agent):
     def changes_in_tabular_description(self):
         return self.prediction_object.changes_in_tabular_description
 
-    def __call__(self, file_diff, model=None):
-        return self.forward(file_diff, model=model)
+    def __call__(self, file_diff, model=None, request_id: str = None):
+        return self.forward(file_diff, model=model, request_id=request_id)
 
 
 __all__ = ["SummarizerAgent"]
