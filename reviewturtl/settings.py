@@ -2,6 +2,11 @@ from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import dspy
 from typing import Optional
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+
+from logging import getLogger
+
+log = getLogger(__name__)
 
 
 class Environment(str, Enum):
@@ -18,6 +23,7 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: Optional[str] = None
     DATABASE_URL: str = ""
     TOKEN_KEY: str = "X-Total-LLM-Tokens"
+    PORTKEY_API_KEY: str = ""
 
     def is_dev(self):
         return self.ENVIRONMENT == Environment.Development
@@ -28,7 +34,15 @@ class Settings(BaseSettings):
 
 def get_4o_token_model():
     return dspy.OpenAI(
-        model="gpt-4o", api_key=Settings().OPENAI_API_KEY, max_tokens=4096
+        model="gpt-4o",
+        api_key=Settings().OPENAI_API_KEY,
+        max_tokens=4096,
+        base_url=PORTKEY_GATEWAY_URL + "/",
+        default_headers=createHeaders(
+            provider="openai",
+            api_key=Settings().PORTKEY_API_KEY,
+            metadata={"_user": "dspy"},
+        ),
     )
 
 
@@ -37,6 +51,7 @@ def initialize_dspy_with_configs(
     api_key: Optional[str] = None,
     max_tokens: Optional[int] = None,
     set_global: bool = True,
+    portkey_api_key: Optional[str] = None,
 ):
     """
     This function initializes dspy with the given model, api_key, and max_tokens.
@@ -54,10 +69,17 @@ def initialize_dspy_with_configs(
         api_key = Settings().OPENAI_API_KEY
     if max_tokens is None:
         max_tokens = 3000
+    if portkey_api_key is None:
+        portkey_api_key = Settings().PORTKEY_API_KEY
+        log.warning(f"PORTKEY_API_KEY is not set, using default {portkey_api_key}")
     turbo = dspy.OpenAI(
         model=model,
         api_key=api_key,
         max_tokens=max_tokens,
+        base_url=PORTKEY_GATEWAY_URL + "/",
+        default_headers=createHeaders(
+            provider="openai", api_key=portkey_api_key, metadata={"_user": "dspy"}
+        ),
     )
     # disable later , right now setting the model to the global level
     if set_global:

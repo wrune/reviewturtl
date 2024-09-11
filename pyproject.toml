@@ -10,7 +10,7 @@ python = "~3.11"
 python-dotenv = "^1.0.1"
 pydantic-settings = "^2.3.4"
 fastapi = "^0.111.0"
-dspy-ai = "^2.4.12"
+dspy-ai = "2.4.14"
 inflection = "^0.5.1"
 fastembed = "0.3.4"
 qdrant-client = "^1.10.1"
@@ -19,6 +19,7 @@ ruff = "^0.5.3"
 uvicorn = "^0.30.6"
 prisma = "0.15.0"
 cachetools = "^5.5.0"
+portkey-ai = "^1.8.7"
 
 [build-system]
 requires = ["poetry-core"]
