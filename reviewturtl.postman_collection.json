@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "d8757a60-b104-4aa5-a64a-ddb152b8e4ad",
+		"name": "reviewturtl",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34242200",
+		"_collection_link": "https://speeding-water-453180.postman.co/workspace/Team-Workspace~dbeff7f5-acff-4bf7-8566-33647f0fa4b6/collection/34242200-d8757a60-b104-4aa5-a64a-ddb152b8e4ad?action=share&source=collection_link&creator=34242200"
+	},
+	"item": [
+		{
+			"name": "Summarizer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"file_diff\": \"\\n    diff --git a/ai/service_desk/api/routers/chat_assist.py b/ai/service_desk/api/routers/chat_assist.py\\n    index acc97831..9944ad65 100644\\n    --- a/ai/service_desk/api/routers/chat_assist.py\\n    +++ b/ai/service_desk/api/routers/chat_assist.py\\n    @@ -1,11 +1,14 @@\\n     from typing import Any\\n    -from fastapi import APIRouter, Request\\n    +from fastapi import APIRouter, Request, BackgroundTasks\\n    +from fastapi.encoders import jsonable_encoder\\n     from service_desk.logger import get_logger\\n     from service_desk.data_types import ChatAssistRequest, User\\n     from service_desk.config import init_config\\n     from service_desk.agents.primary_agent.primary_agent_assist import (\\n         PrimaryAgentAssist,\\n     )\\n    +from core.LogAiModules import LogAiModules, AiLogs\\n    +import json\\n    \\n     log = get_logger(__name__)\\n     router = APIRouter()\\n    @@ -16,11 +19,14 @@\\n         input_dir=None, persist_dir=cfg.rag.persist_dir, embedding_provider_name=\\\"openai\\\"\\n     )\\n    \\n    +log_ai_modules = LogAiModules()\\n    +\\n    \\n     @router.post(\\\"/api/v1/chat/assist\\\")\\n     async def category_search_with_rank(\\n         request: Request,\\n         body: ChatAssistRequest,\\n    +    background_tasks: BackgroundTasks,\\n     ) -> Any:\\n         json_body = body.model_dump()\\n         conversation_history = json_body.get(\\\"messages\\\")\\n    @@ -28,6 +34,7 @@ async def category_search_with_rank(\\n         session_state = json_body.get(\\\"session_state\\\")\\n         request_user_object = json_body.get(\\\"user\\\")\\n         request_org_id = json_body.get(\\\"org_id\\\")\\n    +    session_id = json_body.get(\\\"context\\\").get(\\\"overrides\\\").get(\\\"session_id\\\")\\n    \\n         (\\n             primary_cache,\\n    @@ -57,4 +64,18 @@ async def category_search_with_rank(\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"followup_questions\\\"] = followup_questions\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"citations\\\"] = citations\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"user\\\"] = response_user_object\\n    +    ai_logs = AiLogs(\\n    +        org_id=request_org_id,\\n    +        session_id=session_id,\\n    +        app_id=\\\"chat-agent-assist\\\",\\n    +        request_body=json.dumps(json_body),\\n    +        response_body=json.dumps(jsonable_encoder(response)),\\n    +    )\\n    +    background_tasks.add_task(log_ai_modules_task, ai_logs)\\n         return response\\n    +\\n    +\\n    +async def log_ai_modules_task(ai_logs: AiLogs):\\n    +    await log_ai_modules.connect()\\n    +    await log_ai_modules.log_ai_modules(ai_logs=ai_logs)\\n    +    await log_ai_modules.disconnect()\\n    diff --git a/ai/service_desk/data_types/__init__.py b/ai/service_desk/data_types/__init__.py\\n    index f951b82f..f62b6991 100644\\n    --- a/ai/service_desk/data_types/__init__.py\\n    +++ b/ai/service_desk/data_types/__init__.py\\n    @@ -11,6 +11,7 @@ class Message(BaseModel):\\n     class ContextOverrides(BaseModel):\\n         top: int = 7\\n         retrieval_mode: Literal[\\\"vectors\\\"] = \\\"vectors\\\"\\n    +    session_id: Optional[str] = None\\n         semantic_ranker: bool = True\\n         semantic_captions: bool = False\\n         suggest_followup_questions: bool = False\\n    diff --git a/core/core/LogAiModules.py b/core/core/LogAiModules.py\\n    new file mode 100644\\n    index 00000000..2de319f0\\n    --- /dev/null\\n    +++ b/core/core/LogAiModules.py\\n    @@ -0,0 +1,52 @@\\n    +from prisma import Prisma\\n    +import logging\\n    +from pydantic import BaseModel\\n    +from typing import Any\\n    +\\n    +log = logging.getLogger(__name__)\\n    +\\n    +\\n    +class AiLogs(BaseModel):\\n    +    org_id: str\\n    +    session_id: str\\n    +    app_id: str\\n    +    request_body: Any\\n    +    response_body: Any\\n    +\\n    +\\n    +class LogAiModules:\\n    +    def __init__(self):\\n    +        \\\"Initialize the LogAiModules class with prisma client\\\"\\n    +        self.prisma = Prisma()\\n    +\\n    +    async def connect(self):\\n    +        \\\"Connects to the PostgreSQL database using the Prisma client.\\\"\\n    +        await self.prisma.connect()\\n    +        await self.prisma.connect()\\n    +\\n    +    async def disconnect(self):\\n    +        \\\"Disconnects from the PostgreSQL database using the Prisma client.\\\"\\n    +        await self.prisma.disconnect()\\n    +\\n    +    async def log_ai_modules(self, ai_logs: AiLogs):\\n    +        \\\"Logs the request and response body to the database.\\\"\\n    +        try:\\n    +            await self.prisma.ai_logs.create(\\n    +                data={\\n    +                    \\\"org_id\\\": ai_logs.org_id,\\n    +                    \\\"session_id\\\": ai_logs.session_id,\\n    +                    \\\"app_id\\\": ai_logs.app_id,\\n    +                    \\\"request_body\\\": ai_logs.request_body,\\n    +                    \\\"response_body\\\": ai_logs.response_body,\\n    +                }\\n    +            )\\n    +        except Exception as e:\\n    +            log.error(f\\\"Error logging AI modules: {e}\\\")\\n    +            raise e\\n    diff --git a/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql b/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql\\n    new file mode 100644\\n    index 00000000..99f87af5\\n    --- /dev/null\\n    +++ b/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql\\n    @@ -0,0 +1,2 @@\\n    +-- AlterTable\\n    +ALTER TABLE \\\"ai_logs\\\" ALTER COLUMN \\\"app_id\\\" SET DATA TYPE TEXT;\\n    diff --git a/core/core/db/prisma/schema.prisma b/core/core/db/prisma/schema.prisma\\n    index 804af5f4..d849736e 100644\\n    --- a/core/core/db/prisma/schema.prisma\\n    +++ b/core/core/db/prisma/schema.prisma\\n    @@ -244,7 +244,7 @@ model ai_logs {\\n       created_at    DateTime @default(now()) @db.Timestamptz(6)\\n       org_id        String?  @db.Uuid\\n       session_id    String?  @db.Uuid\\n    -  app_id        String?  @db.Uuid\\n    +  app_id        String?  \\n       request_body  Json?    @db.Json\\n       response_body Json?    @db.Json\\n    }\\n    \"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:7001/api/v1/summarize",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "7001",
+					"path": [
+						"api",
+						"v1",
+						"summarize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reviewer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"file_diff\": \"\\n    diff --git a/ai/service_desk/api/routers/chat_assist.py b/ai/service_desk/api/routers/chat_assist.py\\n    index acc97831..9944ad65 100644\\n    --- a/ai/service_desk/api/routers/chat_assist.py\\n    +++ b/ai/service_desk/api/routers/chat_assist.py\\n    @@ -1,11 +1,14 @@\\n     from typing import Any\\n    -from fastapi import APIRouter, Request\\n    +from fastapi import APIRouter, Request, BackgroundTasks\\n    +from fastapi.encoders import jsonable_encoder\\n     from service_desk.logger import get_logger\\n     from service_desk.data_types import ChatAssistRequest, User\\n     from service_desk.config import init_config\\n     from service_desk.agents.primary_agent.primary_agent_assist import (\\n         PrimaryAgentAssist,\\n     )\\n    +from core.LogAiModules import LogAiModules, AiLogs\\n    +import json\\n    \\n     log = get_logger(__name__)\\n     router = APIRouter()\\n    @@ -16,11 +19,14 @@\\n         input_dir=None, persist_dir=cfg.rag.persist_dir, embedding_provider_name=\\\"openai\\\"\\n     )\\n    \\n    +log_ai_modules = LogAiModules()\\n    +\\n    \\n     @router.post(\\\"/api/v1/chat/assist\\\")\\n     async def category_search_with_rank(\\n         request: Request,\\n         body: ChatAssistRequest,\\n    +    background_tasks: BackgroundTasks,\\n     ) -> Any:\\n         json_body = body.model_dump()\\n         conversation_history = json_body.get(\\\"messages\\\")\\n    @@ -28,6 +34,7 @@ async def category_search_with_rank(\\n         session_state = json_body.get(\\\"session_state\\\")\\n         request_user_object = json_body.get(\\\"user\\\")\\n         request_org_id = json_body.get(\\\"org_id\\\")\\n    +    session_id = json_body.get(\\\"context\\\").get(\\\"overrides\\\").get(\\\"session_id\\\")\\n    \\n         (\\n             primary_cache,\\n    @@ -57,4 +64,18 @@ async def category_search_with_rank(\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"followup_questions\\\"] = followup_questions\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"citations\\\"] = citations\\n         response[\\\"choices\\\"][0][\\\"context\\\"][\\\"user\\\"] = response_user_object\\n    +    ai_logs = AiLogs(\\n    +        org_id=request_org_id,\\n    +        session_id=session_id,\\n    +        app_id=\\\"chat-agent-assist\\\",\\n    +        request_body=json.dumps(json_body),\\n    +        response_body=json.dumps(jsonable_encoder(response)),\\n    +    )\\n    +    background_tasks.add_task(log_ai_modules_task, ai_logs)\\n         return response\\n    +\\n    +\\n    +async def log_ai_modules_task(ai_logs: AiLogs):\\n    +    await log_ai_modules.connect()\\n    +    await log_ai_modules.log_ai_modules(ai_logs=ai_logs)\\n    +    await log_ai_modules.disconnect()\\n    diff --git a/ai/service_desk/data_types/__init__.py b/ai/service_desk/data_types/__init__.py\\n    index f951b82f..f62b6991 100644\\n    --- a/ai/service_desk/data_types/__init__.py\\n    +++ b/ai/service_desk/data_types/__init__.py\\n    @@ -11,6 +11,7 @@ class Message(BaseModel):\\n     class ContextOverrides(BaseModel):\\n         top: int = 7\\n         retrieval_mode: Literal[\\\"vectors\\\"] = \\\"vectors\\\"\\n    +    session_id: Optional[str] = None\\n         semantic_ranker: bool = True\\n         semantic_captions: bool = False\\n         suggest_followup_questions: bool = False\\n    diff --git a/core/core/LogAiModules.py b/core/core/LogAiModules.py\\n    new file mode 100644\\n    index 00000000..2de319f0\\n    --- /dev/null\\n    +++ b/core/core/LogAiModules.py\\n    @@ -0,0 +1,52 @@\\n    +from prisma import Prisma\\n    +import logging\\n    +from pydantic import BaseModel\\n    +from typing import Any\\n    +\\n    +log = logging.getLogger(__name__)\\n    +\\n    +\\n    +class AiLogs(BaseModel):\\n    +    org_id: str\\n    +    session_id: str\\n    +    app_id: str\\n    +    request_body: Any\\n    +    response_body: Any\\n    +\\n    +\\n    +class LogAiModules:\\n    +    def __init__(self):\\n    +        \\\"Initialize the LogAiModules class with prisma client\\\"\\n    +        self.prisma = Prisma()\\n    +\\n    +    async def connect(self):\\n    +        \\\"Connects to the PostgreSQL database using the Prisma client.\\\"\\n    +        await self.prisma.connect()\\n    +        await self.prisma.connect()\\n    +\\n    +    async def disconnect(self):\\n    +        \\\"Disconnects from the PostgreSQL database using the Prisma client.\\\"\\n    +        await self.prisma.disconnect()\\n    +\\n    +    async def log_ai_modules(self, ai_logs: AiLogs):\\n    +        \\\"Logs the request and response body to the database.\\\"\\n    +        try:\\n    +            await self.prisma.ai_logs.create(\\n    +                data={\\n    +                    \\\"org_id\\\": ai_logs.org_id,\\n    +                    \\\"session_id\\\": ai_logs.session_id,\\n    +                    \\\"app_id\\\": ai_logs.app_id,\\n    +                    \\\"request_body\\\": ai_logs.request_body,\\n    +                    \\\"response_body\\\": ai_logs.response_body,\\n    +                }\\n    +            )\\n    +        except Exception as e:\\n    +            log.error(f\\\"Error logging AI modules: {e}\\\")\\n    +            raise e\\n    diff --git a/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql b/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql\\n    new file mode 100644\\n    index 00000000..99f87af5\\n    --- /dev/null\\n    +++ b/core/core/db/prisma/migrations/20240629224932_change_app_id/migration.sql\\n    @@ -0,0 +1,2 @@\\n    +-- AlterTable\\n    +ALTER TABLE \\\"ai_logs\\\" ALTER COLUMN \\\"app_id\\\" SET DATA TYPE TEXT;\\n    diff --git a/core/core/db/prisma/schema.prisma b/core/core/db/prisma/schema.prisma\\n    index 804af5f4..d849736e 100644\\n    --- a/core/core/db/prisma/schema.prisma\\n    +++ b/core/core/db/prisma/schema.prisma\\n    @@ -244,7 +244,7 @@ model ai_logs {\\n       created_at    DateTime @default(now()) @db.Timestamptz(6)\\n       org_id        String?  @db.Uuid\\n       session_id    String?  @db.Uuid\\n    -  app_id        String?  @db.Uuid\\n    +  app_id        String?  \\n       request_body  Json?    @db.Json\\n       response_body Json?    @db.Json\\n    }\\n    \"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:7001/api/v1/summarize",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "7001",
+					"path": [
+						"api",
+						"v1",
+						"summarize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Code Search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"search_query\":\"How to implement health endpoint?\",\n    \"collection_name\":\"code_search\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:7001/api/v1/code_search",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "7001",
+					"path": [
+						"api",
+						"v1",
+						"code_search"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Code Search",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search_query\":\"How to implement health endpoint?\",\n    \"collection_name\":\"code_search\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:7001/api/v1/code_search",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "7001",
+							"path": [
+								"api",
+								"v1",
+								"code_search"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "date",
+							"value": "Mon, 29 Jul 2024 20:12:49 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "759"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": null,\n    \"data\": {\n        \"response_for_search_query\": \"To implement a health endpoint, you can define an asynchronous function that returns the health status of your application. Below is an example implementation:\\n\\n```python\\nasync def health():\\n    return {\\n        \\\"status\\\": \\\"OK\\\",\\n        \\\"app_name\\\": cfg.APP_NAME,\\n        \\\"environment\\\": cfg.ENVIRONMENT,\\n    }\\n```\\n\\nIn this example, the `health` function returns a dictionary containing the status of the application, the application name, and the environment. This function can be used as an endpoint in your API to check the health status of your application.\\n\\n**References:**\\n- File: `api.py`\\n- Path: `/Users/abcom/Desktop/github/reviewturtl/reviewturtl/api/api.py`\\n```\"\n    },\n    \"meta\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Index Code",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"collection_name\": \"sample_collection\",\n  \"repo_id\":\"29f78df9-437b-477d-8846-85653e71585a\",\n  \"file_metadata\": [{\"file_path\": \"reviewturtl/src/example1.py\",\"action\":\"modify\",\"file_content\": \"\\n    class Node3:\\n        def __init__(self):\\n            self.x = 10\\n        def return_type(self):\\n            return self.x\\n    \"}]\n//   {\"file_path\": \"example2.py\",\"action\":\"add\",\"file_content\": \"\\n    def hello():\\n        return \\\"Hello, world!\\\"\\n    \"}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:7001/api/v1/index_code",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "7001",
+					"path": [
+						"api",
+						"v1",
+						"index_code"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
