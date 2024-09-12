@@ -31,4 +31,14 @@ configs:
 
 volumes:
   postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/Desktop/docker_volumes/postgres
   qdrant_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/Desktop/docker_volumes/qdrant

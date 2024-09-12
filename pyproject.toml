@@ -19,6 +19,7 @@ ruff = "^0.5.3"
 uvicorn = "^0.30.6"
 prisma = "0.15.0"
 cachetools = "^5.5.0"
+tree-sitter-language-pack = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core"]
