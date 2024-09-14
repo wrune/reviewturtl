@@ -88,7 +88,7 @@ async def pr_action_handler(payload, request):
         comment = await post_github_comment(
             pr_number, comment_body, owner, repo, github_token
         )
-        log.info(f"Posted new comment to PR #{pr_number}")
+        log.debug(f"Posted new comment to PR #{pr_number} with {comment}")
     elif action in ["synchronize", "edited"]:
         # Fetch existing comment
         existing_comment = await get_existing_comment(
@@ -99,7 +99,7 @@ async def pr_action_handler(payload, request):
             updated_comment = await update_github_comment(
                 existing_comment["id"], comment_body, owner, repo, github_token
             )
-            log.info(
+            log.debug(
                 f"Updated comment {existing_comment['id']} on PR #{pr_number} with {updated_comment['body']}"
             )
         else:
@@ -107,6 +107,6 @@ async def pr_action_handler(payload, request):
             comment = await post_github_comment(
                 pr_number, comment_body, owner, repo, github_token
             )
-            log.info(f"Posted new comment to PR #{pr_number}")
+            log.debug(f"Posted new comment to PR #{pr_number} with {comment}")
     else:
-        log.info(f"No action required for PR #{pr_number}")
+        log.debug(f"No action required for PR #{pr_number}")
