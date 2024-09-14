@@ -83,7 +83,7 @@ async def github_webhook(request: Request):
                 pr_number, owner, repo, github_token, identifier=COMMENT_IDENTIFIER
             )
             if existing_comment:
-                # Update existing comment
+                # Update existing comment, if identifier is present
                 updated_comment = await update_github_comment(
                     existing_comment["id"], comment_body, owner, repo, github_token
                 )
