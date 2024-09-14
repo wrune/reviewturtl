@@ -68,7 +68,10 @@ async def github_webhook(request: Request):
         repo = payload.get("repository", {}).get("full_name")
         request_id = request.headers.get("X-Request-ID", "default-request-id")
         diff_url = payload.get("pull_request", {}).get("diff_url")
+        body = payload.get("pull_request", {}).get("body")
         github_token = settings.PAT_TOKEN
+        log.debug(f"Diff URL: {diff_url}")
+        log.debug(f"Body: {body}")
 
         # Fetch diff content
         file_diff = await fetch_diff_content(diff_url, github_token)
