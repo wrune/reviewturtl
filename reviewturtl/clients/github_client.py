@@ -39,7 +39,7 @@ async def get_existing_comment(
             if response.status == 200:
                 comments = await response.json()
                 for comment in comments:
-                    if comment["body"].startswith(identifier):
+                    if identifier in comment["body"]:
                         return comment
     return None
 
