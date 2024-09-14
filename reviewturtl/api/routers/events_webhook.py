@@ -19,7 +19,7 @@ async def github_webhook(request: Request):
         form_data = await request.form()
         payload = {key: value for key, value in form_data.items()}
     else:
-        log.error(f"Invalid content-type: {content_type}")
+        log.error(f"Invalid content-type: {content_type}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid payload: content-type must be application/json or application/x-www-form-urlencoded, got {content_type}",
