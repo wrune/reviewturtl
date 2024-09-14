@@ -1,52 +1,20 @@
 from fastapi import APIRouter, Request, HTTPException, status
-import httpx
 from reviewturtl.logger import get_logger
 from reviewturtl.settings import get_settings
+from reviewturtl.clients.github_client import (
+    fetch_diff_content,
+    post_github_comment,
+    update_github_comment,
+    get_existing_comment,
+)
+from reviewturtl.clients.ai_client import call_summarizer
 import json
 
 settings = get_settings()
 log = get_logger(__name__)
 router = APIRouter()
 
-# summarize endpoint
-SUMMARIZE_ENDPOINT = (
-    "http://localhost:7001/api/v1/summarize"  # Update with actual endpoint
-)
-
-
-async def fetch_diff_content(
-    owner: str, repo: str, pull_number: int, token: str
-) -> str:
-    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3.diff",  # Request diff format
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
-        response.raise_for_status()
-        return response.text
-
-
-async def call_summarizer(file_diff: str, request_id: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            SUMMARIZE_ENDPOINT,
-            json={"file_diff": file_diff},
-            headers={"X-Request-ID": request_id},
-        )
-        response.raise_for_status()
-        return response.json()
-
-
-async def post_github_comment(
-    pr_number: int, comment: str, owner: str, repo: str, token: str
-):
-    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
-    headers = {"Authorization": f"Bearer {token}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json={"body": comment}, headers=headers)
-        response.raise_for_status()
+COMMENT_IDENTIFIER = "AI_SUMMARY_COMMENT"
 
 
 @router.post("/api/v1/github_webhook", status_code=status.HTTP_204_NO_CONTENT)
@@ -72,20 +40,21 @@ async def github_webhook(request: Request):
     log.debug(f"Received event: {event}")
 
     if event == "pull_request":
+        # Log the payload
         log.debug(f"Payload: {payload}")
         payload = json.loads(payload.get("payload", {}))
         action = payload.get("action")
         pr_number = payload.get("number")
         pr_title = payload.get("pull_request", {}).get("title")
-        repo = payload.get("repository", {}).get("full_name")
+        repo_full_name = payload.get("repository", {}).get("full_name")
         request_id = request.headers.get("X-Request-ID", "default-request-id")
         diff_url = payload.get("pull_request", {}).get("diff_url")
         body = payload.get("pull_request", {}).get("body")
         github_token = settings.PAT_TOKEN
+        owner, repo = repo_full_name.split("/")
         log.debug(f"Diff URL: {diff_url}")
         log.debug(f"Body: {body}")
-        owner = "wrune"
-        repo = "reviewturtl"
+
         # Fetch diff content
         file_diff = await fetch_diff_content(owner, repo, pr_number, github_token)
         log.debug(f"File Diff Content: {file_diff}")
@@ -99,11 +68,36 @@ async def github_webhook(request: Request):
             "tabular_summary", "No tabular summary available"
         )
 
-        # Post comment on GitHub PR
-        comment = (
-            f"Summary of changes:\n\n{summary}\n\nTabular Summary:\n\n{tabular_summary}"
-        )
-        await post_github_comment(pr_number, comment, owner, repo, github_token)
+        comment_body = f"### AI Summary of Changes\n\n{summary}\n\n**Tabular Summary:**\n\n{tabular_summary}"
+        comment_body_with_id = f"{COMMENT_IDENTIFIER}\n\n{comment_body}"
+
+        if action == "opened":
+            # Post new comment
+            comment = await post_github_comment(
+                pr_number, comment_body_with_id, owner, repo, github_token
+            )
+            log.info(f"Posted new comment to PR #{pr_number}: {comment['id']}")
+        elif action in ["synchronize", "edited"]:
+            # Fetch existing comment
+            existing_comment = await get_existing_comment(
+                pr_number, owner, repo, github_token, identifier=COMMENT_IDENTIFIER
+            )
+            if existing_comment:
+                # Update existing comment
+                updated_comment = await update_github_comment(
+                    existing_comment["id"], comment_body, owner, repo, github_token
+                )
+                log.info(
+                    f"Updated comment {existing_comment['id']} on PR #{pr_number} with {updated_comment['body']}"
+                )
+            else:
+                # If no existing comment, post a new one
+                comment = await post_github_comment(
+                    pr_number, comment_body_with_id, owner, repo, github_token
+                )
+                log.info(f"Posted new comment to PR #{pr_number}: {comment['id']}")
+        else:
+            log.warning(f"Unhandled pull_request action: {action}")
 
         log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
     elif event == "push":
