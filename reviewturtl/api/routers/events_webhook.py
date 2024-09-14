@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, HTTPException, status
 import httpx
 from reviewturtl.logger import get_logger
 from reviewturtl.settings import get_settings
+import json
 
 settings = get_settings()
 log = get_logger(__name__)
@@ -63,7 +64,7 @@ async def github_webhook(request: Request):
 
     if event == "pull_request":
         log.debug(f"Payload: {payload}")
-        payload = payload.get("payload", {})
+        payload = json.loads(payload.get("payload", {}))
         action = payload.get("action")
         pr_number = payload.get("number")
         pr_title = payload.get("pull_request", {}).get("title")
