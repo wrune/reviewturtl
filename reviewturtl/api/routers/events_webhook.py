@@ -18,7 +18,7 @@ async def github_webhook(request: Request, body: Any):
         )
 
     event = request.headers.get("X-GitHub-Event", "ping")
-    payload = await body.json()  # Corrected to parse JSON payload
+    payload = body.json()  # Corrected to parse JSON payload
     log.debug(f"Received event: {event}")
 
     if event == "pull_request":
