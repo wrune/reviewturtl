@@ -10,11 +10,15 @@ router = APIRouter()
 
 @router.post("/api/v1/github_webhook", status_code=status.HTTP_204_NO_CONTENT)
 async def github_webhook(request: Request):
+    # Log request headers for debugging
+    log.debug(f"Request headers: {request.headers}")
+
     # Verify the request is from GitHub
     if request.headers.get("content-type") != "application/json":
-        log.error("Invalid content-type")
+        log.error(f"Invalid content-type: {request.headers.get('content-type')}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid payload: content-type must be application/json",
         )
 
     event = request.headers.get("X-GitHub-Event", "ping")
