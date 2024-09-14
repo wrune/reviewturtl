@@ -9,7 +9,7 @@ log = get_logger(__name__)
 router = APIRouter()
 
 SUMMARIZE_ENDPOINT = (
-    "http://localhost:8000/api/v1/summarize"  # Update with actual endpoint
+    "http://localhost:7001/api/v1/summarize"  # Update with actual endpoint
 )
 
 
