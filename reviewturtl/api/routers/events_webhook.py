@@ -63,6 +63,7 @@ async def github_webhook(request: Request):
 
     if event == "pull_request":
         log.debug(f"Payload: {payload}")
+        payload = payload.get("payload", {})
         action = payload.get("action")
         pr_number = payload.get("number")
         pr_title = payload.get("pull_request", {}).get("title")
