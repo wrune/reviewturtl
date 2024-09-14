@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, status
+
+
 from reviewturtl.logger import get_logger
 
 log = get_logger(__name__)
@@ -15,7 +17,7 @@ async def github_webhook(request: Request):
         )
 
     event = request.headers.get("X-GitHub-Event", "ping")
-    payload = await request.body
+    payload = await request.json()  # Corrected to parse JSON payload
     log.debug(f"Received event: {event}")
 
     if event == "pull_request":
