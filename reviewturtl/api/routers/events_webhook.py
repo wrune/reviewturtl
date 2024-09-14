@@ -14,7 +14,7 @@ settings = get_settings()
 log = get_logger(__name__)
 router = APIRouter()
 
-COMMENT_IDENTIFIER = "AI_SUMMARY_COMMENT"
+COMMENT_IDENTIFIER = "AI Summary of Changes"
 
 
 @router.post("/api/v1/github_webhook", status_code=status.HTTP_204_NO_CONTENT)
@@ -68,13 +68,12 @@ async def github_webhook(request: Request):
             "tabular_summary", "No tabular summary available"
         )
 
-        comment_body = f"### AI Summary of Changes\n\n{summary}\n\n**Tabular Summary:**\n\n{tabular_summary}"
-        comment_body_with_id = f"{COMMENT_IDENTIFIER}\n\n{comment_body}"
+        comment_body = f"### {COMMENT_IDENTIFIER}\n\n{summary}\n\n**Tabular Summary:**\n\n{tabular_summary}"
 
         if action == "opened":
             # Post new comment
             comment = await post_github_comment(
-                pr_number, comment_body_with_id, owner, repo, github_token
+                pr_number, comment_body, owner, repo, github_token
             )
             log.info(f"Posted new comment to PR #{pr_number}: {comment['id']}")
         elif action in ["synchronize", "edited"]:
@@ -83,7 +82,7 @@ async def github_webhook(request: Request):
                 pr_number, owner, repo, github_token, identifier=COMMENT_IDENTIFIER
             )
             if existing_comment:
-                # Update existing comment, if identifier is present
+                # Update existing comment, if identifier is present with identifier
                 updated_comment = await update_github_comment(
                     existing_comment["id"], comment_body, owner, repo, github_token
                 )
@@ -93,7 +92,7 @@ async def github_webhook(request: Request):
             else:
                 # If no existing comment is found with the identifier , post a new one
                 comment = await post_github_comment(
-                    pr_number, comment_body_with_id, owner, repo, github_token
+                    pr_number, comment_body, owner, repo, github_token
                 )
                 log.info(f"Posted new comment to PR #{pr_number}")
         else:
