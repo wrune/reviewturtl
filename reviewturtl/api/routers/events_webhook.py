@@ -91,7 +91,7 @@ async def github_webhook(request: Request):
                     f"Updated comment {existing_comment['id']} on PR #{pr_number} with {updated_comment['body']}"
                 )
             else:
-                # If no existing comment, post a new one
+                # If no existing comment is found with the identifier , post a new one
                 comment = await post_github_comment(
                     pr_number, comment_body_with_id, owner, repo, github_token
                 )
