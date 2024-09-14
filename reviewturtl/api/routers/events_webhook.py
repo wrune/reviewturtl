@@ -1,8 +1,42 @@
 from fastapi import APIRouter, Request, HTTPException, status
+import httpx
 from reviewturtl.logger import get_logger
+from reviewturtl.settings import get_settings
 
+settings = get_settings()
 log = get_logger(__name__)
 router = APIRouter()
+
+SUMMARIZE_ENDPOINT = (
+    "http://localhost:8000/api/v1/summarize"  # Update with actual endpoint
+)
+
+
+async def fetch_diff_content(diff_url: str, token: str) -> str:
+    headers = {"Authorization": f"token {token}"}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(diff_url, headers=headers)
+        response.raise_for_status()
+        return response.text
+
+
+async def call_summarizer(file_diff: str, request_id: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            SUMMARIZE_ENDPOINT,
+            json={"file_diff": file_diff},
+            headers={"X-Request-ID": request_id},
+        )
+        response.raise_for_status()
+        return response.json()
+
+
+async def post_github_comment(pr_number: int, comment: str, repo: str, token: str):
+    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+    headers = {"Authorization": f"token {token}"}
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json={"body": comment}, headers=headers)
+        response.raise_for_status()
 
 
 @router.post("/api/v1/github_webhook", status_code=status.HTTP_204_NO_CONTENT)
@@ -31,17 +65,33 @@ async def github_webhook(request: Request):
         action = payload.get("action")
         pr_number = payload.get("number")
         pr_title = payload.get("pull_request", {}).get("title")
+        repo = payload.get("repository", {}).get("full_name")
+        request_id = request.headers.get("X-Request-ID", "default-request-id")
+        diff_url = payload.get("pull_request", {}).get("diff_url")
+        github_token = settings.PAT_TOKEN
 
-        if action == "opened":
-            # Handle PR opened event
-            log.info(f"Pull Request #{pr_number} opened: {pr_title}")
-            # Add your summarization logic here
-        elif action == "synchronize":
-            # Handle PR updated with new commits
-            log.info(f"Pull Request #{pr_number} synchronized with new commits.")
-            # Update the summary as needed
+        if action in ["opened", "synchronize"]:
+            # Fetch diff content
+            file_diff = await fetch_diff_content(diff_url, github_token)
+            log.debug(f"File Diff Content: {file_diff}")
+
+            # Call summarizer endpoint
+            summary_response = await call_summarizer(file_diff, request_id)
+            summary = summary_response.get("data", {}).get(
+                "walkthrough", "No summary available"
+            )
+
+            # Post comment on GitHub PR
+            comment = f"Summary of changes:\n\n{summary}"
+            await post_github_comment(pr_number, comment, repo, github_token)
+
+            log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
         else:
             log.warning(f"Unhandled pull request action: {action}")
+    elif event == "push":
+        # Handle push event
+        log.info(f"Push event received with payload: {payload}")
+        # Add your push event handling logic here
     else:
         # Handle other events if necessary
         log.warning(f"Unhandled event: {event}")

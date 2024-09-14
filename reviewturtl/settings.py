@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: Optional[str] = None
     DATABASE_URL: str = ""
     TOKEN_KEY: str = "X-Total-LLM-Tokens"
+    PAT_TOKEN: str = ""
 
     def is_dev(self):
         return self.ENVIRONMENT == Environment.Development
