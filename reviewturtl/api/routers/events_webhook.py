@@ -95,7 +95,7 @@ async def github_webhook(request: Request):
                 comment = await post_github_comment(
                     pr_number, comment_body_with_id, owner, repo, github_token
                 )
-                log.info(f"Posted new comment to PR #{pr_number}: {comment['id']}")
+                log.info(f"Posted new comment to PR #{pr_number}")
         else:
             log.warning(f"Unhandled pull_request action: {action}")
 
