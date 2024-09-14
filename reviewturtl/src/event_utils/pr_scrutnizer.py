@@ -9,6 +9,7 @@ from reviewturtl.clients.github_client import (
     get_existing_comment,
 )
 
+# A specific identifier for the comment
 COMMENT_IDENTIFIER = "AI Summary of Changes"
 settings = get_settings()
 
