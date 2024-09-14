@@ -38,8 +38,10 @@ async def call_summarizer(file_diff: str, request_id: str):
         return response.json()
 
 
-async def post_github_comment(pr_number: int, comment: str, repo: str, token: str):
-    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+async def post_github_comment(
+    pr_number: int, comment: str, owner: str, repo: str, token: str
+):
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
     headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json={"body": comment}, headers=headers)
@@ -95,7 +97,7 @@ async def github_webhook(request: Request):
 
         # Post comment on GitHub PR
         comment = f"Summary of changes:\n\n{summary}"
-        await post_github_comment(pr_number, comment, repo, github_token)
+        await post_github_comment(pr_number, comment, owner, repo, github_token)
 
         log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
     elif event == "push":
