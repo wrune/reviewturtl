@@ -70,24 +70,21 @@ async def github_webhook(request: Request):
         diff_url = payload.get("pull_request", {}).get("diff_url")
         github_token = settings.PAT_TOKEN
 
-        if action in ["opened", "synchronize"]:
-            # Fetch diff content
-            file_diff = await fetch_diff_content(diff_url, github_token)
-            log.debug(f"File Diff Content: {file_diff}")
+        # Fetch diff content
+        file_diff = await fetch_diff_content(diff_url, github_token)
+        log.debug(f"File Diff Content: {file_diff}")
 
-            # Call summarizer endpoint
-            summary_response = await call_summarizer(file_diff, request_id)
-            summary = summary_response.get("data", {}).get(
-                "walkthrough", "No summary available"
-            )
+        # Call summarizer endpoint
+        summary_response = await call_summarizer(file_diff, request_id)
+        summary = summary_response.get("data", {}).get(
+            "walkthrough", "No summary available"
+        )
 
-            # Post comment on GitHub PR
-            comment = f"Summary of changes:\n\n{summary}"
-            await post_github_comment(pr_number, comment, repo, github_token)
+        # Post comment on GitHub PR
+        comment = f"Summary of changes:\n\n{summary}"
+        await post_github_comment(pr_number, comment, repo, github_token)
 
-            log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
-        else:
-            log.warning(f"Unhandled pull request action: {action}")
+        log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
     elif event == "push":
         # Handle push event
         log.info(f"Push event received with payload: {payload}")
