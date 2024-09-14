@@ -7,7 +7,7 @@ async def fetch_diff_content(
 ) -> str:
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3.diff",  # Request diff format
     }
     async with httpx.AsyncClient() as client:
@@ -20,7 +20,7 @@ async def post_github_comment(
     pr_number: int, comment: str, owner: str, repo: str, token: str
 ):
     url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
-    headers = {"Authorization": f"token {token}"}
+    headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json={"body": comment}, headers=headers)
         response.raise_for_status()
@@ -31,7 +31,7 @@ async def get_existing_comment(
 ):
     url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json",
     }
     async with aiohttp.ClientSession() as session:
@@ -49,7 +49,7 @@ async def update_github_comment(
 ):
     url = f"https://api.github.com/repos/{owner}/{repo}/issues/comments/{comment_id}"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json",
     }
     payload = {"body": new_body}
