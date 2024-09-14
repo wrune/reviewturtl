@@ -13,10 +13,16 @@ SUMMARIZE_ENDPOINT = (
 )
 
 
-async def fetch_diff_content(diff_url: str, token: str) -> str:
-    headers = {"Authorization": f"token {token}"}
+async def fetch_diff_content(
+    owner: str, repo: str, pull_number: int, token: str
+) -> str:
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3.diff",  # Request diff format
+    }
     async with httpx.AsyncClient() as client:
-        response = await client.get(diff_url, headers=headers)
+        response = await client.get(url, headers=headers)
         response.raise_for_status()
         return response.text
 
@@ -34,7 +40,7 @@ async def call_summarizer(file_diff: str, request_id: str):
 
 async def post_github_comment(pr_number: int, comment: str, repo: str, token: str):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
-    headers = {"Authorization": f"token {token}"}
+    headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json={"body": comment}, headers=headers)
         response.raise_for_status()
@@ -75,9 +81,10 @@ async def github_webhook(request: Request):
         github_token = settings.PAT_TOKEN
         log.debug(f"Diff URL: {diff_url}")
         log.debug(f"Body: {body}")
-
+        owner = "wrune"
+        repo = "reviewturtl"
         # Fetch diff content
-        file_diff = await fetch_diff_content(diff_url, github_token)
+        file_diff = await fetch_diff_content(owner, repo, pr_number, github_token)
         log.debug(f"File Diff Content: {file_diff}")
 
         # Call summarizer endpoint
