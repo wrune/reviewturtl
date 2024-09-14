@@ -2,13 +2,14 @@ from fastapi import APIRouter, Request, HTTPException, status
 
 
 from reviewturtl.logger import get_logger
+from typing import Any
 
 log = get_logger(__name__)
 router = APIRouter()
 
 
 @router.post("/api/v1/github_webhook", status_code=status.HTTP_204_NO_CONTENT)
-async def github_webhook(request: Request):
+async def github_webhook(request: Request, body: Any):
     # Verify the request is from GitHub
     if request.headers.get("content-type") != "application/json":
         log.error("Invalid content-type")
@@ -17,7 +18,7 @@ async def github_webhook(request: Request):
         )
 
     event = request.headers.get("X-GitHub-Event", "ping")
-    payload = await request.json()  # Corrected to parse JSON payload
+    payload = await body.json()  # Corrected to parse JSON payload
     log.debug(f"Received event: {event}")
 
     if event == "pull_request":
