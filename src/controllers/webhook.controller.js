@@ -23,6 +23,7 @@ async function handleWebhookEvent(body, event, installationId) {
             switch (task) {
               case "summary":
                 await handlePullRequestSummary(body, installationId);
+                // save the comment id to the db
                 break;
               case "review":
                 await handlePullRequestReview(body, installationId);
@@ -30,14 +31,9 @@ async function handleWebhookEvent(body, event, installationId) {
             }
             break;
           }
+        case "synchronize" || "edited":
+          // get the comment id from the db if there is one and then edit the same comment
 
-        case "review_requested":
-          // Implement your PR review requested handling logic here
-          break;
-
-        case "closed":
-          // Implement your PR closed handling logic here
-          break;
       }
       break;
 
