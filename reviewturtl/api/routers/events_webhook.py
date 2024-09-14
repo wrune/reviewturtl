@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, status
-
-
 from reviewturtl.logger import get_logger
-from typing import Any
 
 log = get_logger(__name__)
 router = APIRouter()
@@ -15,15 +12,19 @@ async def github_webhook(request: Request):
 
     # Verify the request is from GitHub
     content_type = request.headers.get("content-type")
-    if content_type != "application/json":
+    if content_type == "application/json":
+        payload = await request.json()
+    elif content_type == "application/x-www-form-urlencoded":
+        form_data = await request.form()
+        payload = {key: value for key, value in form_data.items()}
+    else:
         log.error(f"Invalid content-type: {content_type}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid payload: content-type must be application/json, got {content_type}",
+            detail=f"Invalid payload: content-type must be application/json or application/x-www-form-urlencoded, got {content_type}",
         )
 
     event = request.headers.get("X-GitHub-Event", "ping")
-    payload = await request.json()  # Corrected to parse JSON payload
     log.debug(f"Received event: {event}")
 
     if event == "pull_request":
