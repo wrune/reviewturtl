@@ -95,9 +95,14 @@ async def github_webhook(request: Request):
         summary = summary_response.get("data", {}).get(
             "walkthrough", "No summary available"
         )
+        tabular_summary = summary_response.get("data", {}).get(
+            "tabular_summary", "No tabular summary available"
+        )
 
         # Post comment on GitHub PR
-        comment = f"Summary of changes:\n\n{summary}"
+        comment = (
+            f"Summary of changes:\n\n{summary}\n\nTabular Summary:\n\n{tabular_summary}"
+        )
         await post_github_comment(pr_number, comment, owner, repo, github_token)
 
         log.info(f"Pull Request #{pr_number} {action}: {pr_title}")
