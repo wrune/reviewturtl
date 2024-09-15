@@ -10,7 +10,7 @@ const createOctokit = (installationId) =>
     auth: {
       appId: config.GITHUB_APP_ID,
       privateKey: config.GITHUB_PRIVATE_KEY,
-      installationId: installationId,
+      installationId: installationId, // different for each installation , should be saved in database
     },
   });
 

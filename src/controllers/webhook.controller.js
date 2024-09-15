@@ -23,6 +23,7 @@ async function handleWebhookEvent(body, event, installationId) {
             switch (task) {
               case "summary":
                 await handlePullRequestSummary(body, installationId);
+                //TODO: Add Hidden Indetifier to the comment
                 break;
               case "review":
                 await handlePullRequestReview(body, installationId);
@@ -30,14 +31,9 @@ async function handleWebhookEvent(body, event, installationId) {
             }
             break;
           }
+        case "synchronize" || "edited":
+        //TODO:Get the identifier from the comment and update the comment, the identifier is a hidden comment
 
-        case "review_requested":
-          // Implement your PR review requested handling logic here
-          break;
-
-        case "closed":
-          // Implement your PR closed handling logic here
-          break;
       }
       break;
 
