@@ -23,7 +23,7 @@ async function handleWebhookEvent(body, event, installationId) {
             switch (task) {
               case "summary":
                 await handlePullRequestSummary(body, installationId);
-                //TODO: Add Indetifier to the comment
+                //TODO: Add Hidden Indetifier to the comment
                 break;
               case "review":
                 await handlePullRequestReview(body, installationId);
