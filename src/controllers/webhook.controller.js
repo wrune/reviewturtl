@@ -23,7 +23,7 @@ async function handleWebhookEvent(body, event, installationId) {
             switch (task) {
               case "summary":
                 await handlePullRequestSummary(body, installationId);
-                // save the comment id to the db
+                //TODO: Add Indetifier to the comment
                 break;
               case "review":
                 await handlePullRequestReview(body, installationId);
@@ -32,7 +32,7 @@ async function handleWebhookEvent(body, event, installationId) {
             break;
           }
         case "synchronize" || "edited":
-          // get the comment id from the db if there is one and then edit the same comment
+        //TODO:Get the identifier from the comment and update the comment
 
       }
       break;
