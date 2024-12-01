@@ -1,34 +1,45 @@
 services:
-  qdrant:
-    image: qdrant/qdrant:latest
-    restart: always
-    container_name: qdrant-turtl
-    ports:
-      - 6343:6333
-      - 6344:6334
-    expose:
-      - 6333
-      - 6334
-      - 6335
-    volumes:
-      - qdrant_data:/qdrant/storage
-  db:
-    image: postgres:latest
-    container_name: postgres-turtl
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: turtl
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    qdrant:
+        image: qdrant/qdrant:latest
+        restart: always
+        container_name: qdrant-turtl
+        ports:
+            - 6343:6333
+            - 6344:6334
+        expose:
+            - 6333
+            - 6334
+            - 6335
+        volumes:
+            - qdrant_data:/qdrant/storage
+    db:
+        image: postgres:latest
+        container_name: postgres-turtl
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: root
+            POSTGRES_DB: turtl
+        ports:
+            - "5433:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
 
-configs:
-  qdrant_config:
-    content: |
-      log_level: INFO
+    webhook:
+        build: .
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env
+        volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules
+        command: npm run dev
+
+# configs:
+#   qdrant_config:
+#     content: |
+#       log_level: INFO
 
 volumes:
-  postgres_data:
-  qdrant_data:
+    postgres_data:
+    qdrant_data:
