@@ -66,9 +66,7 @@ const handleInstallation = async (payload) => {
   const octokit = createOctokit(payload.installation.id);
   const { data } = await octokit.apps.listReposAccessibleToInstallation();
   console.log(data);
-  data.repositories.forEach(async (repo) => {
-    await listAllContent(octokit, repo);
-  });
+  await Promise.all(data.repositories.map((repo) => listAllContent(octokit, repo)));
 };
 
 const listAllContent = async (octokit, repo) => {

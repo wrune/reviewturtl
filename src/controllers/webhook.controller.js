@@ -41,6 +41,10 @@ async function handleWebhookEvent(body, event, installationId) {
       await handleInstallation(body);
       break;
 
+    case "issue_comment":
+      // which type of comment? normal or bot tagged
+      break;
+
     case "issues":
       await handleIssue(body, installationId);
       break;
