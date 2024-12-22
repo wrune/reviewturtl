@@ -24,17 +24,6 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
 
-    webhook:
-        build: .
-        ports:
-            - "3000:3000"
-        env_file:
-            - .env
-        volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
-        command: npm run dev
-
 # configs:
 #   qdrant_config:
 #     content: |

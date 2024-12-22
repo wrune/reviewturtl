@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 dotenv.config();
 
-const privateKey = fs.readFileSync("./rt.pem", "utf-8", (err, data) => {
+const privateKey = fs.readFileSync("./rt.pem", { encoding: "utf-8" }, (err, data) => {
   if (err) {
     console.error("Error reading file, add rt.pem file at root", err);
     return;
