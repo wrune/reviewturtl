@@ -1,3 +1,4 @@
+import { Command } from "../helpers/commands.js";
 import {
   handlePullRequestReview,
   handlePullRequestSummary,
@@ -6,7 +7,7 @@ import {
 } from "../services/octokit.service.js";
 
 async function handleWebhookEvent(body, event, installationId) {
-  console.log("Handling webhook event", event, body, installationId);
+  console.log("Handling webhook event", event, installationId);
   // look for evoke commands here, and update the db.
   // was it a up or down command or does it contain an action command.
   // if it was an action command, then we need to check if the user has the permission to perform the action.
@@ -32,13 +33,18 @@ async function handleWebhookEvent(body, event, installationId) {
             break;
           }
         case "synchronize" || "edited":
-        //TODO:Get the identifier from the comment and update the comment, the identifier is a hidden comment
-
+          //TODO:Get the identifier from the comment and update the comment, the identifier is a hidden comment
+          break;
       }
       break;
 
     case "installation":
       await handleInstallation(body);
+      break;
+
+    case "issue_comment":
+      // which type of comment? normal or bot tagged
+      const cmd = new Command(body, installationId);
       break;
 
     case "issues":

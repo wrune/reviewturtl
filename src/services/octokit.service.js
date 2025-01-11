@@ -3,6 +3,7 @@ import { createAppAuth } from "@octokit/auth-app";
 import config from "../constants/config.js";
 import { turtle } from "./turtle.service.js";
 import fs from "fs";
+import { PullRequest } from "../helpers/pullRequests.js";
 
 const createOctokit = (installationId) =>
   new Octokit({
@@ -32,6 +33,15 @@ const handlePullRequestReview = async (payload, installationId) => {
 };
 
 const handlePullRequestSummary = async (payload, installationId) => {
+  const pr = new PullRequest(payload);
+  await pr.save();
+
+  const active = await pr.active();
+  if (!active) {
+    console.log(`Actions paused on pr: ${pr.pull_request.pr_number}`);
+    return;
+  }
+
   const octokit = createOctokit(installationId);
   const res = await octokit.pulls.get({
     owner: payload.repository.owner.login,
@@ -66,9 +76,7 @@ const handleInstallation = async (payload) => {
   const octokit = createOctokit(payload.installation.id);
   const { data } = await octokit.apps.listReposAccessibleToInstallation();
   console.log(data);
-  data.repositories.forEach(async (repo) => {
-    await listAllContent(octokit, repo);
-  });
+  await Promise.all(data.repositories.map((repo) => listAllContent(octokit, repo)));
 };
 
 const listAllContent = async (octokit, repo) => {
