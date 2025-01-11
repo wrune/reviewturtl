@@ -33,8 +33,8 @@ async function handleWebhookEvent(body, event, installationId) {
             break;
           }
         case "synchronize" || "edited":
-        //TODO:Get the identifier from the comment and update the comment, the identifier is a hidden comment
-
+          //TODO:Get the identifier from the comment and update the comment, the identifier is a hidden comment
+          break;
       }
       break;
 
