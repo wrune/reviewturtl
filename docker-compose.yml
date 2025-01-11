@@ -4,10 +4,10 @@ services:
         restart: always
         container_name: qdrant-turtl
         ports:
-            - 6343:6333
+            - 6343:6444
             - 6344:6334
         expose:
-            - 6333
+            - 6444
             - 6334
             - 6335
         volumes:
